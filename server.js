@@ -1,21 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const User = require('./models/User');
 const path = require('path'); // Importowanie path
+const session = require('express-session'); // Importowanie express-session
 const app = express();
+const PORT = 5000;
 const Workday = require('./models/Workday'); // Zakładając, że masz folder models i plik Workday.js
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const cron = require('node-cron');
-const session = require('express-session');
-
-app.use(session({
-    secret: 'twój_secret', // Zmień na silny sekret
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Ustaw na true tylko, gdy używasz HTTPS
-}));
 
 const cors = require('cors');
 app.use(cors());
@@ -25,15 +19,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public'))); // Umożliwia serwowanie plików statycznych
 app.use('/src', express.static(path.join(__dirname, 'src')));
-app.use('/public', express.static(path.join(__dirname, 'public')));
-
-// Konfiguracja sesji
-app.use(session({
-    secret: 'your-secret-key', // Zmienna do podpisywania sesji
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Ustaw na true, gdy używasz HTTPS
-}));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
 
 // Połączenie z MongoDB
 const mongoURI = process.env.MONGO_URI || 'mongodb+srv://matiwitkowski311:qkaXQmxTwfyc5ol0@cluster0.ter8xk2.mongodb.net/IREX'; // Użyj swojej URI
@@ -46,30 +34,84 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html')); // Serwowanie index.html
 });
 
-// Endpoint logowania
+// Inicjalizacja sesji
+app.use(session({
+    secret: 'sekretny_klucz',
+    resave: false,
+    saveUninitialized: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware do sprawdzania, czy użytkownik jest zalogowany
+function checkAuth(req, res, next) {
+    if (req.session.user && req.session.user.username) {
+        return next(); // Użytkownik jest zalogowany, przejdź do następnej funkcji
+    } else {
+        res.redirect('/index.html'); // Przekierowanie do index.html, jeśli nie jest zalogowany
+    }
+}
+
+// Endpoint do logowania
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        console.log(`Próba logowania dla: ${username}`); // Loguj próby logowania
         const user = await User.findOne({ username });
         if (!user) {
-            console.error('Brak użytkownika:', username);
             return res.status(401).send('Nieprawidłowe dane logowania');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.error('Błędne hasło dla użytkownika:', username);
             return res.status(401).send('Nieprawidłowe dane logowania');
         }
 
+        // Logowanie informacji o zalogowanym użytkowniku
+        console.log(`Użytkownik ${username} zalogował się o ${new Date().toLocaleString()}`);
+
+        // Ustawienie username w sesji
         req.session.user = { username: user.username };
+
+        // Zalogowany pomyślnie
         res.redirect('/strona-glowna.html');
     } catch (error) {
         console.error('Błąd logowania:', error);
         res.status(500).send('Wystąpił błąd serwera');
     }
+});
+
+// Endpoint do pobrania username
+app.get('/api/username', (req, res) => {
+    if (req.session.user) {
+        return res.json({ username: req.session.user.username });
+    } else {
+        return res.json({ username: null });
+    }
+});
+
+// Zabezpieczone trasy
+app.get('/strona-glowna.html', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'strona-glowna.html'));
+});
+
+app.get('/zarzadzanie-powiadomieniami.html', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'zarzadzanie-powiadomieniami.html'));
+});
+
+app.get('/grafik.html', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'grafik.html'));
+});
+
+// Endpoint do wylogowywania
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).send('Wystąpił błąd przy wylogowywaniu.');
+        }
+        res.redirect('/index.html');
+    });
 });
 
 // Endpoint rejestracji
@@ -88,15 +130,6 @@ app.post('/register', async (req, res) => {
     } catch (error) {
         console.error('Błąd rejestracji:', error);
         res.status(500).send('Wystąpił błąd serwera');
-    }
-});
-
-// Endpoint do pobrania username
-app.get('/api/username', (req, res) => {
-    if (req.session.user) {
-        res.json({ username: req.session.user.username }); // Zakładając, że 'username' jest w sesji
-    } else {
-        res.json({ username: null });
     }
 });
 
@@ -194,18 +227,6 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
-// Funkcja do usuwania starych danych
-const run = async () => {
-    try {
-        await Workday.deleteMany({ employee: { $in: ['User1', 'User2'] } });
-        console.log('Stare dane zostały usunięte!');
-    } catch (error) {
-        console.error('Błąd przy usuwaniu danych:', error);
-    }
-};
-
-run(); // Wywołanie funkcji
-
 // Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
 const sendNotification = async (employee, formattedDate, reportNumber) => {
     try {
@@ -251,7 +272,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na północ każdego dnia
-cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -282,7 +303,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
             embeds: [
                 {
                     title: "Przypomnienie o kończącym się terminie!",
-                    description: `Minęło 5 dni od daty **(${formattedDate})**, przypominamy o sprawdzeniu raportów!`,
+                    description: `Minęło 5 dni od daty **${formattedDate}**, przypominamy o sprawdzeniu raportów!`,
                     color: 15158332, // Kolor czerwony
                     fields: [
                         {
@@ -318,7 +339,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania
-cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
@@ -347,9 +368,8 @@ cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
 
-// Użycie dynamicznie przydzielonego portu
-const PORT = process.env.PORT
 
+// Start serwera
 app.listen(PORT, () => {
     console.log(`Serwer działa na porcie ${PORT}`);
 });
