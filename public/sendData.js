@@ -16,6 +16,7 @@ const sendFormData = async (formData) => {
         }
 
         alert('Dane zostały pomyślnie wysłane!');
+        location.reload(); // Odśwież stronę po pomyślnym wysłaniu danych
     } catch (error) {
         console.error('Error sending data:', error);
         alert('Wystąpił błąd podczas wysyłania danych. Sprawdź konsolę, aby uzyskać więcej informacji.');
