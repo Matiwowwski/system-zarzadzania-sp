@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona Główna</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Ciemne tło */
+            color: #ffffff; /* Jasny kolor tekstu */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #1e1e1e; /* Ciemny kolor nagłówka */
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            position: fixed; /* Przyklejony do góry */
+            top: 0; /* Ustawienie na górze */
+            z-index: 1000; /* Upewnienie się, że nagłówek jest nad innymi elementami */
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #ffffff;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 1.2em;
+            color: #b0b0b0; /* Jasnoszary kolor */
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 100px 40px 40px; /* Umożliwienie miejsca dla nagłówka */
+            gap: 20px; /* Odstępy między kafelkami */
+        }
+
+        .btn {
+            background-color: #4a90e2; /* Kolor przycisku */
+            color: #fff;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1.5em;
+            width: 250px; /* Zwiększona szerokość kafelka */
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn:hover {
+            background-color: #2b5688; /* Ciemniejszy kolor przycisku po najechaniu */
+            transform: translateY(-5px); /* Efekt unoszenia */
+        }
+
+        .footer {
+            background-color: #1e1e1e; /* Ciemny kolor stopki */
+            color: #ffffff; /* Jasny kolor tekstu */
+            text-align: center;
+            padding: 20px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Witamy w systemie zarządzania!</h1>
+        <p id="username"></p>
+    </div>
+    <div class="button-container">
+        <a href="grafik.html" class="btn">Grafik Pracy</a>
+        <a href="zarzadzanie-powiadomieniami.html" class="btn">Zarządzanie Powiadomieniami</a>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 VZTM Szczecin</p>
+    </div>
+    <script>
+        // Funkcja pobierająca username z serwera
+        async function getUsername() {
+            try {
+                const response = await fetch('/api/username'); // Upewnij się, że endpoint jest poprawny
+                const data = await response.json();
+                return data.username || null; // Zwróć nazwę użytkownika lub null
+            } catch (error) {
+                console.error('Błąd podczas pobierania username:', error);
+                return null; // Zwróć null w przypadku błędu
+            }
+        }
+
+        // Wyświetlanie powitania z nazwą użytkownika
+        (async () => {
+            const username = await getUsername();
+            const usernameElement = document.getElementById('username');
+            usernameElement.textContent = username ? `Cześć ${username}! Życzę Ci miłej pracy w systemie!` : `Witamy w systemie zarządzania!`;
+        })();
+    </script>
+</body>
+</html>

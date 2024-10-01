@@ -1,0 +1,476 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    margin: 0;
+}
+
+.header {
+    background-color: #1e1e1e;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-container {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.calendar {
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    width: 80vw;
+    max-width: 1000px;
+}
+
+.days-of-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: bold;
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.day {
+    background-color: #2a2a2a;
+    padding: 40px;
+    border-radius: 5px;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    height: 50px;
+}
+
+.day:hover {
+    background-color: #6200ea;
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.footer {
+    background-color: #1e1e1e;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+}
+
+button {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5em;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    color: #6200ea;
+}
+
+h2 {
+    margin: 0;
+    padding: 0 10px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex; /* Użycie flex do centrowania */
+    justify-content: center; /* Wyśrodkowanie w poziomie */
+    align-items: center; /* Wyśrodkowanie w pionie */
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    overflow: hidden;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #2b2b2b;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+button {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #357ABD;
+}
+
+#modalDate {
+    margin-bottom: 10px;
+    color: #fff;
+    text-align: center;
+}
+
+.accordion-container {
+    margin-top: 10px;
+}
+
+.accordion-item {
+    border: 1px solid #ccc;
+    margin: 5px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.accordion-header {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.accordion-content {
+    padding: 5px;
+    background-color: #fff;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.calendar-table th, .calendar-table td {
+    border: 1px solid #444;
+    padding: 10px;
+    text-align: center;
+}
+
+.calendar-table th {
+    background-color: #333;
+}
+
+.calendar-table td {
+    background-color: #222;
+    position: relative;
+}
+
+.add-button {
+    display: block; /* Umożliwia zajęcie całej szerokości komórki */
+    margin: 10px auto; /* Marginesy z góry i dołu, automatyczne wyśrodkowanie */
+    background-color: #007bff; /* Kolor tła */
+    color: white; /* Kolor tekstu */
+    border: none; /* Brak obramowania */
+    border-radius: 3px; /* Zaokrąglone rogi */
+    cursor: pointer; /* Zmieniony kursor po najechaniu */
+    padding: 8px 12px; /* Wewnętrzne odstępy */
+    text-align: center; /* Wyśrodkowanie tekstu */
+}
+
+.add-button:hover {
+    background-color: #0056b3; /* Zmiana koloru po najechaniu */
+}
+
+.footer {
+    background-color: #1e1e1e; /* Ciemny kolor stopki */
+    color: #ffffff; /* Jasny kolor tekstu */
+    text-align: center;
+    padding: 20px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.9em;
+}
+/* Stylizacja dla całej komórki akordeonu */
+.workday-entry {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Stylizacja nagłówka akordeonu */
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #ddd; /* Domyślny kolor */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    color: white; /* Kolor tekstu */
+}
+
+/* Kolory w zależności od typu zadania (dodane przez JS) */
+.accordion-header.red {
+    background-color: red;
+}
+
+.accordion-header.blue {
+    background-color: blue;
+}
+
+/* Stylizacja dla rozwijanej zawartości akordeonu */
+.accordion-content {
+    padding: 10px;
+    background-color: #f9f9f9;
+    display: none; /* Ukryte domyślnie */
+    border-top: 1px solid #ccc;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Stylizacja dla aktywnej zawartości (gdy akordeon jest otwarty) */
+.accordion-content.active {
+    display: block; /* Pokaż zawartość, gdy aktywna */
+}
+
+/* Opcjonalna stylizacja dla komórki kalendarza */
+.day {
+    position: relative;
+    padding: 10px;
+    border: 1px solid #eee;
+}
+
+/* Stylizacja komórki dla znaku + (usuwanego przy generowaniu akordeonu) */
+.plus-sign {
+    font-size: 20px;
+    color: green;
+    text-align: center;
+}
+
+/* Responsywność akordeonu (dopasowanie do wielkości komórek) */
+@media (max-width: 600px) {
+    .accordion-header, .accordion-content {
+        font-size: 12px;
+    }
+}
+.context-menu {
+    border: 1px solid #ccc;
+    background-color: white;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Zapewnij, że menu jest na wierzchu */
+    padding: 10px;
+    position: absolute;
+}
+
+.context-menu div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.context-menu div:hover {
+    background-color: #f0f0f0; /* Efekt na hover */
+}
+.styled-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #2b2b2b;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.styled-input:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+.styled-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #2b2b2b;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.styled-select:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+.modal-date {
+    text-align: center; /* Wycentruj tekst w elemencie */
+    width: 100%;       /* Ustaw szerokość na 100% kontenera */
+    margin: 0;         /* Usuń domyślne marginesy */
+}
+.modal-content h2 {
+    margin-bottom: 20px; /* Dostosuj wartość w pikselach według potrzeb */
+}
+.red {
+    background-color: #ff5733; /* Czerwony */
+}
+
+.blue {
+    background-color: #007bff; /* Wyrazisty niebieski */
+}
+
+.yellow {
+    background-color: #ffc107; /* Wyrazisty żółty */
+}
+
+.green {
+    background-color: #28a745; /* Wyrazisty zielony */
+}
+
+.orange {
+    background-color: #fd7e14; /* Wyrazisty pomarańczowy */
+}
+
+.purple {
+    background-color: #6f42c1; /* Wyrazisty fioletowy */
+}
+
+.pink {
+    background-color: #e83e8c; /* Wyrazisty różowy */
+}
+
+.gray {
+    background-color: #6c757d; /* Ciemny szary */
+}
+
+.cyan {
+    background-color: #17a2b8; /* Wyrazisty cyjanowy */
+}
+
+.light-blue {
+    background-color: #5bc0de; /* Wyrazisty jasno-niebieski */
+}
+.details-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #2b2b2b; /* Tło dopasowane do reszty */
+    color: #fff; /* Kolor tekstu */
+    box-sizing: border-box; /* Upewnij się, że padding nie zmienia rozmiaru elementu */
+}
+
+.details-textarea:focus {
+    border-color: #4a90e2; /* Kolor obramowania po kliknięciu */
+    outline: none; /* Usunięcie standardowego konturu */
+}
+.summary-container {
+    margin: 2px; /* Margines 20px z każdej strony: góra, dół, lewo, prawo */
+}
+
+.summary-table {
+    width: calc(100% - 40px); /* Szerokość tabeli: odejmujemy 40px (20px margines z lewej i prawej) */
+    margin: 0 auto; /* Wyśrodkowanie tabeli */
+    border-collapse: collapse; /* Usunięcie odstępów między komórkami */
+}
+
+.summary-table th, .summary-table td {
+    border: 1px solid #ccc; /* Obramowanie komórek */
+    padding: 8px; /* Odstępy wewnątrz komórek */
+    text-align: center; /* Wyrównanie tekstu do środka */
+}
+
+.summary-table th {
+    background-color: #f2f2f2; /* Kolor tła nagłówka, zmień na ten sam kolor, co boczny pasek */
+    /* Przykład: jeśli boczny pasek ma inny kolor, zmień #f2f2f2 na odpowiedni kolor */
+    color: #000; /* Kolor tekstu w nagłówku */
+}
+
+.summary-table td:first-child {
+    background-color: #f2f2f2; /* Dopasowanie bocznego paska */
+    color: #000; /* Kolor tekstu w bocznej kolumnie */
+    font-weight: bold; /* Wytłuszczony tekst */
+}
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nav-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.month-display {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}

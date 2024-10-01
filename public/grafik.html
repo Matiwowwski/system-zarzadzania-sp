@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mój Kalendarz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <button id="prevWeek">Poprzedni tydzień</button>
+        <h1>Grafik Pracy</h1>
+        <button id="nextWeek">Następny tydzień</button>
+    </div>
+
+    <div class="calendar-container">
+        <table class="calendar-table">
+            <thead>
+                <tr>
+                    <th>Pracownik</th>
+                    <th id="dayHeader1"></th>
+                    <th id="dayHeader2"></th>
+                    <th id="dayHeader3"></th>
+                    <!-- Więcej dni -->
+                </tr>
+            </thead>
+            <tbody id="calendarBody">
+                <!-- Dynamicznie generowane wiersze dla pracowników -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span onclick="closeModal()" class="close">&times;</span>
+            <h2 id="modalDate"></h2>
+            <form id="eventForm">
+                <div class="form-group">
+                    <label for="modalCellId">ID komórki:</label>
+                    <input type="text" id="modalCellId" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Data:</label>
+                    <input type="text" id="eventDate" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="employee">Pracownik:</label>
+                    <input type="text" id="employee" required>
+                </div>
+                <div class="form-group">
+                    <label for="task">Zadanie:</label>
+                    <select id="task" onchange="updateOptions()" required>
+                        <option value="">Wybierz...</option>
+                        <option value="sprawdzanieRaportów">Sprawdzanie raportów</option>
+                        <option value="urlop">Urlop</option>
+                        <option value="dyżur">Dyżur</option>
+                        <option value="dzieńWolnyNienaruszalny">Dzień wolny nienaruszalny</option>
+                        <option value="nieobecnośćNieusprawiedliwiona">Nieobecność nieusprawiedliwiona</option>
+                        <option value="szkolenie">Szkolenie</option>
+                        <option value="zastępstwo">Zastępstwo</option>
+                        <option value="zawieszenie">Zawieszenie</option>
+                        <option value="oddelegowanie">Oddelegowanie</option>
+                        <option value="inneCzynnościSłużbowe">Inne czynności służbowe</option>
+                    </select>
+                </div>
+                <div id="additionalOptions"></div>
+                <input type="hidden" id="modalCellId" /> <!-- Ukryte pole na cellId -->
+                <button id="submitButton" type="submit">ZAPISZ</button> <!-- Domyślny tekst to "ZAPISZ" -->
+            </form>
+        </div>
+    </div>
+    
+
+    <!-- Nowy modal do edycji -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span onclick="closeEditModal()" class="close">&times;</span>
+            <h2 id="editModalDate"></h2>
+            <form id="editEventForm">
+                <div class="form-group">
+                    <label for="editModalCellId">ID komórki:</label>
+                    <input type="text" id="editModalCellId" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editEventDate">Data:</label>
+                    <input type="text" id="editEventDate" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editEmployee">Pracownik:</label>
+                    <input type="text" id="editEmployee" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTask">Zadanie:</label>
+                    <select id="editTask" onchange="updateEditOptions()" required>
+                        <option value="">Wybierz...</option>
+                        <option value="sprawdzanieRaportów">Sprawdzanie raportów</option>
+                        <option value="urlop">Urlop</option>
+                        <option value="dyżur">Dyżur</option>
+                        <option value="dzieńWolnyNienaruszalny">Dzień wolny nienaruszalny</option>
+                        <option value="nieobecnośćNieusprawiedliwiona">Nieobecność nieusprawiedliwiona</option>
+                        <option value="szkolenie">Szkolenie</option>
+                        <option value="zastępstwo">Zastępstwo</option>
+                        <option value="zawieszenie">Zawieszenie</option>
+                        <option value="oddelegowanie">Oddelegowanie</option>
+                        <option value="inneCzynnościSłużbowe">Inne czynności służbowe</option>
+                    </select>
+                </div>
+                <input type="hidden" id="editModalId" value="">
+                <div id="editAdditionalOptions"></div>
+                <input type="hidden" id="editModalCellId" /> <!-- Ukryte pole na cellId -->
+                <button id="editSubmitButton" type="submit">ZAPISZ ZMIANY</button>
+                <button id="deleteButton" type="button" onclick="deleteWorkday()">USUŃ</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="accordionContainer"></div>
+
+    <script src="grafik.js"></script>
+    <script src="sendData.js"></script>
+    <script src="fetchData.js"></script>
+    <script src="editModal.js"></script>
+    <script src="workSummary.js"></script>
+</body>
+</html>
