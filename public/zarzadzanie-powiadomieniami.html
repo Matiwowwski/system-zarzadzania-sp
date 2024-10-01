@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzanie Powiadomieniami</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #1e1e1e;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #ffffff;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 1.2em;
+            color: #b0b0b0;
+        }
+
+        .container {
+            padding: 100px 20px 20px; /* Umożliwienie miejsca dla nagłówka */
+            width: 100%;
+            max-width: 600px; /* Maksymalna szerokość kontenera */
+            margin: auto;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #2a2a2a;
+            color: #ffffff;
+        }
+
+        .form-group button {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .form-group button:hover {
+            background-color: #2b5688;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Zarządzanie powiadomieniami</h1>
+    </div>
+    <div class="container">
+        <div class="form-group">
+            <label for="template">Wybierz szablon powiadomienia:</label>
+            <select id="template" onchange="toggleFields()">
+                <option value="">-- Wybierz szablon --</option>
+                <option value="raport">Mijający czas na sprawdzenie raportu</option>
+            </select>
+        </div>
+
+        <div id="additional-fields" style="display: none;">
+            <div class="form-group">
+                <label for="employee">Wybierz pracownika:</label>
+                <select id="employee">
+                    <option value="SA-100">SA-100</option>
+                    <option value="SP-100">SP-100</option>
+                    <option value="SP-101">SP-101</option>
+                    <option value="SP-102">SP-102</option>
+                    <option value="SP-103">SP-103</option>
+                    <option value="SP-104">SP-104</option>
+                    <option value="SP-105">SP-105</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="duration-type">Długość czasu:</label>
+                <select id="duration-type">
+                    <option value="dni">Dni</option>
+                    <option value="godziny">Godziny</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="duration-amount">Ilość czasu:</label>
+                <input type="number" id="duration-amount" placeholder="Wpisz ilość czasu" min="1">
+            </div>
+            <div class="form-group">
+                <label for="report-date">Data zdania raportów:</label>
+                <input type="date" id="report-date" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button onclick="sendNotification()">Wyślij Powiadomienie</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2024 VZTM Szczecin</p>
+    </div>
+
+    <script>
+        function toggleFields() {
+            const templateSelect = document.getElementById('template');
+            const additionalFields = document.getElementById('additional-fields');
+            if (templateSelect.value === 'raport') {
+                additionalFields.style.display = 'block';
+            } else {
+                additionalFields.style.display = 'none';
+            }
+        }
+
+        function sendNotification() {
+            const employee = document.getElementById('employee').value;
+            const durationType = document.getElementById('duration-type').value;
+            const durationAmount = document.getElementById('duration-amount').value;
+            const reportDate = document.getElementById('report-date').value; // Dodano nowe pole
+
+            // Walidacja pól
+            if (!employee || !durationType || !durationAmount || !reportDate) {
+                alert('Wypełnij wszystkie pola!');
+                return;
+            }
+
+            // Zbudowanie danych powiadomienia
+            const notificationData = {
+                employee,
+                durationType,
+                durationAmount,
+                reportDate // Dodano nowe pole
+            };
+
+            // Wysyłanie powiadomienia do webhooka (przykładowy adres)
+            fetch('YOUR_WEBHOOK_URL_HERE', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(notificationData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Powiadomienie zostało wysłane!');
+                } else {
+                    alert('Wystąpił błąd podczas wysyłania powiadomienia.');
+                }
+            })
+            .catch(error => {
+                console.error('Błąd:', error);
+                alert('Wystąpił błąd podczas wysyłania powiadomienia.');
+            });
+        }
+    </script>
+    <script src="sendNotification.js"></script>
+</body>
+</html>
