@@ -77,18 +77,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const eventDate = document.getElementById('eventDate');
         const employeeInput = document.getElementById('employee');
         const modalCellId = document.getElementById('modalCellId');
-
-        // Pobranie pełnej daty z obiektu `day`
+    
         const fullDate = day.toLocaleDateString('pl-PL');
         modalDate.textContent = `Wydarzenie na ${fullDate} - ${employee}`;
-        eventDate.value = fullDate;  // Ustawienie pełnej daty w formacie DD.MM.YYYY
-        employeeInput.value = employee;
-        modalCellId.value = cellId;
+        eventDate.value = fullDate; 
+        employeeInput.value = employee; 
+        modalCellId.value = cellId; 
+    
+        modal.style.display = 'flex'; 
+        document.body.classList.add('modal-open'); // Blokowanie przewijania
 
-        modal.style.display = 'flex';
-        document.body.classList.add('modal-open');
+        updateOptions(); 
+    }
 
-        updateOptions(); // Zaktualizuj opcje w modalu
+    window.closeModal = function () {
+        const modal = document.getElementById('modal');
+        modal.style.display = 'none'; 
+        document.body.classList.remove('modal-open'); // Odblokowanie przewijania
+        clearModal(); 
     }
 
     function clearModal() {
@@ -119,35 +125,32 @@ document.addEventListener('DOMContentLoaded', function () {
         const additionalOptionsDiv = document.getElementById('additionalOptions');
         const selectedTask = taskSelect.value;
         additionalOptionsDiv.innerHTML = '';
-    
+
         // Dodanie pola szczegóły, domyślnie ukryte
         const detailsLabel = document.createElement('label');
         detailsLabel.textContent = 'Szczegóły:';
         const detailsInput = document.createElement('input');
         detailsInput.type = 'text';
         detailsInput.id = 'details';
-        detailsInput.style.textTransform = 'capitalize'; // Wymusza wielką literę na początku
-    
+
         if (selectedTask === 'urlop' || selectedTask === 'sprawdzanieRaportów') {
-            // Jeśli zadanie to urlop lub sprawdzanie raportów, ukryj pole
             detailsLabel.style.display = 'none';
             detailsInput.style.display = 'none';
             detailsInput.disabled = true; // Ustaw pole na tylko do odczytu
         } else {
-            // Inne zadania: pokaż pole i wypełnij je nazwą zadania
             detailsInput.value = selectedTask; // Automatycznie wpisz nazwę zadania
             detailsInput.disabled = false; // Włącz możliwość edycji
         }
-    
+
         additionalOptionsDiv.appendChild(detailsLabel);
         additionalOptionsDiv.appendChild(detailsInput);
-    
+
         // Typ urlopu
         if (selectedTask === 'urlop') {
             const leaveTypeLabel = document.createElement('label');
             leaveTypeLabel.textContent = 'Typ urlopu:';
             additionalOptionsDiv.appendChild(leaveTypeLabel);
-    
+
             const leaveTypeSelect = document.createElement('select');
             leaveTypeSelect.id = 'leaveType';
             leaveTypeSelect.innerHTML = `
@@ -158,11 +161,10 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             additionalOptionsDiv.appendChild(leaveTypeSelect);
         } else if (selectedTask === 'sprawdzanieRaportów') {
-            // Dodaj pole do numeru raportu
             const reportNumberLabel = document.createElement('label');
             reportNumberLabel.textContent = 'Numer raportu:';
             additionalOptionsDiv.appendChild(reportNumberLabel);
-    
+
             const reportNumberSelect = document.createElement('select');
             reportNumberSelect.id = 'reportNumber';
             reportNumberSelect.innerHTML = `
@@ -174,14 +176,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    window.closeModal = function () {
-        const modal = document.getElementById('modal');
-        modal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-        clearModal();
-    }
-
-    // Event listeners dla przycisków
     document.getElementById('prevWeek').addEventListener('click', () => changeWeek(-1));
     document.getElementById('nextWeek').addEventListener('click', () => changeWeek(1));
 

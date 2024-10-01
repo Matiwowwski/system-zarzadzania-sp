@@ -65,9 +65,9 @@ if (workday.task === 'sprawdzanieRaportów') {
     accordionHeader.classList.add('blue'); // Dodanie klasy niebieskiej dla urlopu
 } else if (workday.task === 'dyżur') {
     accordionHeader.classList.add('yellow'); // Dodanie klasy żółtej dla dyżuru
-} else if (workday.task === 'dzieńWolnyNienaruszalny') {
+} else if (workday.task === 'dzień wolny nienaruszalny') {
     accordionHeader.classList.add('green'); // Dodanie klasy zielonej dla dnia wolnego
-} else if (workday.task === 'nieobecnośćNieusprawiedliwiona') {
+} else if (workday.task === 'nieobecność nieusprawiedliwiona') {
     accordionHeader.classList.add('orange'); // Dodanie klasy pomarańczowej dla nieusprawiedliwionej nieobecności
 } else if (workday.task === 'szkolenie') {
     accordionHeader.classList.add('purple'); // Dodanie klasy fioletowej dla szkolenia
@@ -77,7 +77,7 @@ if (workday.task === 'sprawdzanieRaportów') {
     accordionHeader.classList.add('gray'); // Dodanie klasy szarej dla zawieszenia
 } else if (workday.task === 'oddelegowanie') {
     accordionHeader.classList.add('cyan'); // Dodanie klasy cyjanowej dla oddelegowania
-} else if (workday.task === 'inneCzynnościSłużbowe') {
+} else if (workday.task === 'inne czynności służbowe') {
     accordionHeader.classList.add('light-blue'); // Dodanie klasy jasnoniebieskiej dla innych czynności
 } else {
     accordionHeader.style.backgroundColor = '#ddd'; // Domyślny kolor dla innych zadań
