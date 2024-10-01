@@ -92,29 +92,33 @@
     <div class="button-container">
         <a href="grafik.html" class="btn">Grafik Pracy</a>
         <a href="zarzadzanie-powiadomieniami.html" class="btn">Zarządzanie Powiadomieniami</a>
+        <form action="/logout" method="POST" style="display: inline;">
+            <button type="submit" class="btn">Wyloguj</button>
+        </form>
     </div>
     <div class="footer">
         <p>&copy; 2024 VZTM Szczecin</p>
     </div>
     <script>
-        // Funkcja pobierająca username z serwera
-        async function getUsername() {
-            try {
-                const response = await fetch('/api/username'); // Upewnij się, że endpoint jest poprawny
-                const data = await response.json();
-                return data.username || null; // Zwróć nazwę użytkownika lub null
-            } catch (error) {
-                console.error('Błąd podczas pobierania username:', error);
-                return null; // Zwróć null w przypadku błędu
-            }
-        }
+       // Funkcja pobierająca username z serwera
+async function getUsername() {
+    try {
+        const response = await fetch('/api/username'); // Upewnij się, że endpoint jest poprawny
+        const data = await response.json();
+        return data.username || null; // Zwróć nazwę użytkownika lub null
+    } catch (error) {
+        console.error('Błąd podczas pobierania username:', error);
+        return null; // Zwróć null w przypadku błędu
+    }
+}
 
-        // Wyświetlanie powitania z nazwą użytkownika
-        (async () => {
-            const username = await getUsername();
-            const usernameElement = document.getElementById('username');
-            usernameElement.textContent = username ? `Cześć ${username}! Życzę Ci miłej pracy w systemie!` : `Witamy w systemie zarządzania!`;
-        })();
+// Wyświetlanie powitania z nazwą użytkownika
+(async () => {
+    const username = await getUsername();
+    const usernameElement = document.getElementById('username');
+    usernameElement.textContent = username ? `Cześć ${username}! Życzę Ci miłej pracy w systemie!` : `Witamy w systemie zarządzania!`;
+})();
     </script>
+    <script src="checkAuth.js"></script>
 </body>
 </html>
