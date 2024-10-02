@@ -85,10 +85,11 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/api/username', (req, res) => {
-    if (req.session.user) {
-        return res.json({ username: req.session.user.username });
+    console.log('Sesja:', req.session); // Loguje całą sesję, aby zobaczyć, co zawiera
+    if (req.session.user && req.session.user.username) {
+        res.json({ username: req.session.user.username });
     } else {
-        return res.json({ username: null });
+        res.json({ username: null });
     }
 });
 
@@ -227,16 +228,16 @@ const isCorrectTime = () => {
     const timeString = now.toLocaleString('en-US', options);
 
     // Sprawdzenie, czy godzina to 3:32 PM
-    return timeString === '4:30 PM';
+    return timeString === '4:40 PM';
 };
 
 // Funkcja, która sprawdza godzinę co minutę
 const checkTimeEveryMinute = () => {
     setInterval(() => {
         if (isCorrectTime()) {
-            console.log("It's 4:30 PM in Warsaw!");
+            console.log("It's 4:40 PM in Warsaw!");
         } else {
-            console.log("It's not 4:30 PM yet.");
+            console.log("It's not 4:40 PM yet.");
         }
     }, 60000); // 60000 ms = 1 minuta
 };
