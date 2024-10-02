@@ -228,16 +228,16 @@ const isCorrectTime = () => {
     const timeString = now.toLocaleString('en-US', options);
 
     // Sprawdzenie, czy godzina to 3:32 PM
-    return timeString === '4:50 PM';
+    return timeString === '5:57 PM';
 };
 
 // Funkcja, która sprawdza godzinę co minutę
 const checkTimeEveryMinute = () => {
     setInterval(() => {
         if (isCorrectTime()) {
-            console.log("It's 4:40 PM in Warsaw!");
+            console.log("It's 5:14 PM in Warsaw!");
         } else {
-            console.log("It's not 4:40 PM yet.");
+            console.log("It's not 5:14 PM yet.");
         }
     }, 60000); // 60000 ms = 1 minuta
 };
@@ -257,6 +257,14 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
+        
+        // Oblicz timestamp na północ za 5 dni
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 6); // Ustaw datę na 5 dni do przodu
+        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+
+        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
+
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
             embeds: [
@@ -268,6 +276,11 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
                         {
                             name: "Zakres sprawdzania:",
                             value: `${reportNumber}`,
+                            inline: true
+                        },
+                        {
+                            name: "Termin mija:",
+                            value: `<t:${timestamp}:R>`, // Timestamp na północ za 5 dni
                             inline: true
                         }
                     ],
@@ -330,6 +343,14 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
+
+        // Oblicz timestamp na północ następnego dnia
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 1); // Ustaw datę na następny dzień
+        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+
+        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
+
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID
             embeds: [
@@ -341,6 +362,11 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                         {
                             name: "Zakres sprawdzania:",
                             value: `${reportNumber}`,
+                            inline: true
+                        },
+                        {
+                            name: "Termin mija:",
+                            value: `<t:${timestamp}:R>`, // Timestamp na północ następnego dnia
                             inline: true
                         }
                     ],
