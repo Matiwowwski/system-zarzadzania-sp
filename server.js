@@ -217,8 +217,22 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
+// Funkcja do sprawdzania, czy aktualna godzina to 15:20
+const isCorrectTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    return hours === 15 && minutes === 32;
+};
+
 // Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
 const sendNotification = async (employee, formattedDate, reportNumber) => {
+    if (!isCorrectTime()) {
+        console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
+        return;
+    }
+
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
         const message = {
@@ -262,8 +276,8 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj zadanie na północ każdego dnia
-cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
+// Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
+cron.schedule('* * * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -274,7 +288,7 @@ cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij wiadomość pingując pracownika z embedem
+                // Wyślij wiadomość pingując pracownika z embedem, jeśli jest 15:20
                 await sendNotification(workday.employee, formattedDate, workday.reportNumber);
             }
         } else {
@@ -287,6 +301,11 @@ cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
+    if (!isCorrectTime()) {
+        console.log('Nieprawidłowa godzina. Przypomnienie nie zostanie wysłane.');
+        return;
+    }
+
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
         const message = {
@@ -330,8 +349,8 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj przypomnienie na 5 dni po dacie zadania
-cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
+// Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
+cron.schedule('* * * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
@@ -345,7 +364,7 @@ cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij przypomnienie pingując pracownika
+                // Wyślij przypomnienie pingując pracownika, jeśli jest 15:20
                 await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
         } else {
@@ -355,6 +374,7 @@ cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
     }
 });
+
 
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
