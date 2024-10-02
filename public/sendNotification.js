@@ -20,7 +20,7 @@ async function sendNotification() {
     // Pobierz dane z formularza
     const employee = document.getElementById('employee').value;
     const durationType = document.getElementById('duration-type').value;
-    const durationAmount = document.getElementById('duration-amount').value;
+    const durationAmount = parseInt(document.getElementById('duration-amount').value, 10);
     const reportDate = document.getElementById('report-date').value; // Pobieramy datę zdania raportu
 
     // Sprawdź, czy wszystkie pola są wypełnione
@@ -36,6 +36,22 @@ async function sendNotification() {
         day: '2-digit',
     });
 
+    // Oblicz datę końca (północ następnego dnia) na podstawie wprowadzonego czasu
+    const futureDate = new Date();
+    
+    // Sprawdzanie jednostki czasu
+    if (durationType === 'godzin') {
+        futureDate.setHours(futureDate.getHours() + durationAmount);
+    } else if (durationType === 'dni') {
+        futureDate.setDate(futureDate.getDate() + durationAmount);
+    }
+    
+    // Ustaw na północ następnego dnia
+    futureDate.setDate(futureDate.getDate() + 1);
+    futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+
+    const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
+
     // Zbudowanie danych powiadomienia
     const userId = getUserId(employee);
     const message = {
@@ -49,6 +65,11 @@ async function sendNotification() {
                     {
                         name: "Pozostały czas na sprawdzenie:",
                         value: `${durationAmount} ${durationType}`,
+                        inline: true
+                    },
+                    {
+                        name: "Do końca czasu:",
+                        value: `<t:${timestamp}:R>`, // Dodaj timestamp
                         inline: true
                     }
                 ],
