@@ -253,7 +253,8 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Wystąpił błąd: ${response.statusText}`);
+            const errorText = await response.text(); // Pobierz tekst błędu
+            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
     } catch (error) {
@@ -262,7 +263,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na północ każdego dnia
-cron.schedule('55 12 * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -320,7 +321,8 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Wystąpił błąd: ${response.statusText}`);
+            const errorText = await response.text(); // Pobierz tekst błędu
+            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Przypomnienie wysłane pomyślnie!');
     } catch (error) {
@@ -329,7 +331,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania
-cron.schedule('55 12 * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('* * * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
@@ -353,7 +355,6 @@ cron.schedule('55 12 * * *', async () => { // Ustawione na codziennie o północ
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
     }
 });
-
 
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
