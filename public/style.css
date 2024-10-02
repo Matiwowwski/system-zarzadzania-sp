@@ -230,14 +230,15 @@ button:hover {
 
 .add-button {
     display: block; /* Umożliwia zajęcie całej szerokości komórki */
-    margin: 10px auto; /* Marginesy z góry i dołu, automatyczne wyśrodkowanie */
+    margin: 5px auto; /* Zmniejszone marginesy z góry i dołu, automatyczne wyśrodkowanie */
     background-color: #007bff; /* Kolor tła */
     color: white; /* Kolor tekstu */
     border: none; /* Brak obramowania */
     border-radius: 3px; /* Zaokrąglone rogi */
     cursor: pointer; /* Zmieniony kursor po najechaniu */
-    padding: 8px 12px; /* Wewnętrzne odstępy */
+    padding: 4px 8px; /* Zmniejszone wewnętrzne odstępy */
     text-align: center; /* Wyśrodkowanie tekstu */
+    font-size: 14px; /* Zmniejszony rozmiar czcionki */
 }
 
 .add-button:hover {
@@ -312,7 +313,7 @@ button:hover {
 
 /* Stylizacja komórki dla znaku + (usuwanego przy generowaniu akordeonu) */
 .plus-sign {
-    font-size: 20px;
+    font-size: 5px;
     color: green;
     text-align: center;
 }
