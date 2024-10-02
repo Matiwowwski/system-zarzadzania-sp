@@ -228,7 +228,7 @@ const isCorrectTime = () => {
     const timeString = now.toLocaleString('en-US', options);
 
     // Sprawdzenie, czy godzina to 3:32 PM
-    return timeString === '4:40 PM';
+    return timeString === '4:50 PM';
 };
 
 // Funkcja, która sprawdza godzinę co minutę
