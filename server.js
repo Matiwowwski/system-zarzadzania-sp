@@ -225,10 +225,10 @@ const isCorrectTime = () => {
     const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
     
     // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
-    const [hour, minute] = now.toLocaleString('en-US', options).split(':');
+    const timeString = now.toLocaleString('en-US', options);
 
-    // Sprawdzenie, czy godzina to 3 PM i minuta to 32
-    return hour.trim() === '3 PM' && minute.trim() === '45';
+    // Sprawdzenie, czy godzina to 3:32 PM
+    return timeString === '4:08 PM';
 };
 
 // Testowanie funkcji isCorrectTime
