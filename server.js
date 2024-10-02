@@ -23,17 +23,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 
-// Połączenie z MongoDB
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://matiwitkowski311:qkaXQmxTwfyc5ol0@cluster0.ter8xk2.mongodb.net/IREX'; // Użyj swojej URI
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('Połączono z MongoDB'))
-    .catch(err => console.error('Błąd połączenia z MongoDB:', err));
-
-// Endpoint dla GET /
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html')); // Serwowanie index.html
-});
-
 // Inicjalizacja sesji
 app.use(session({
     secret: 'sekretny_klucz',
@@ -53,16 +42,29 @@ function checkAuth(req, res, next) {
     }
 }
 
-// Endpoint do logowania
+// Połączenie z MongoDB
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://matiwitkowski311:qkaXQmxTwfyc5ol0@cluster0.ter8xk2.mongodb.net/IREX'; // Użyj swojej URI
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Połączono z MongoDB'))
+    .catch(err => console.error('Błąd połączenia z MongoDB:', err));
+
+// Endpoint dla GET /
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html')); // Serwowanie index.html
+});
+
+// Endpoint logowania
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
+        // Sprawdź, czy użytkownik istnieje w bazie danych
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(401).send('Nieprawidłowe dane logowania');
         }
 
+        // Porównaj hasło podane przez użytkownika z hasłem w bazie danych
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).send('Nieprawidłowe dane logowania');
@@ -72,17 +74,16 @@ app.post('/login', async (req, res) => {
         console.log(`Użytkownik ${username} zalogował się o ${new Date().toLocaleString()}`);
 
         // Ustawienie username w sesji
-        req.session.user = { username: user.username };
+        req.session.user = { username: user.username }; // Ustawienie username w sesji
 
         // Zalogowany pomyślnie
-        res.redirect('/strona-glowna.html');
+        res.redirect('/strona-glowna.html'); // Przekierowanie po udanym logowaniu
     } catch (error) {
         console.error('Błąd logowania:', error);
         res.status(500).send('Wystąpił błąd serwera');
     }
 });
 
-// Endpoint do pobrania username
 app.get('/api/username', (req, res) => {
     if (req.session.user) {
         return res.json({ username: req.session.user.username });
@@ -91,25 +92,14 @@ app.get('/api/username', (req, res) => {
     }
 });
 
-// Zabezpieczone trasy
-app.get('/strona-glowna.html', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'strona-glowna.html'));
-});
-
-app.get('/zarzadzanie-powiadomieniami.html', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'zarzadzanie-powiadomieniami.html'));
-});
-
-app.get('/grafik.html', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'grafik.html'));
-});
-
-// Endpoint do wylogowywania
+// Endpoint wylogowania
 app.post('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
-            return res.status(500).send('Wystąpił błąd przy wylogowywaniu.');
+            console.error('Błąd podczas wylogowania:', err);
+            return res.status(500).send('Wystąpił błąd podczas wylogowania');
         }
+        // Przekierowanie do strony głównej po wylogowaniu
         res.redirect('/index.html');
     });
 });
@@ -272,7 +262,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na północ każdego dnia
-cron.schedule('30 1 * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -339,7 +329,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania
-cron.schedulval('30 1 * * *', async () => { // Ustawione na codziennie o północy
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
