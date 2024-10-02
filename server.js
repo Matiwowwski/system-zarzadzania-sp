@@ -217,14 +217,22 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
-// Funkcja do sprawdzania, czy aktualna godzina to 15:20
+// Funkcja do sprawdzania, czy aktualna godzina to 15:32 w Polsce w formacie amerykańskim
 const isCorrectTime = () => {
     const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
     
-    return hours === 15 && minutes === 38;
+    // Ustawienie opcji do formatu amerykańskiego
+    const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
+    
+    // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
+    const [hour, minute] = now.toLocaleString('en-US', options).split(':');
+
+    // Sprawdzenie, czy godzina to 3 PM i minuta to 32
+    return hour.trim() === '3 PM' && minute.trim() === '45';
 };
+
+// Testowanie funkcji isCorrectTime
+console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
 // Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
 const sendNotification = async (employee, formattedDate, reportNumber) => {
