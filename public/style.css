@@ -448,14 +448,14 @@ button:hover {
 }
 
 .summary-table th {
-    background-color: #f2f2f2; /* Kolor tła nagłówka, zmień na ten sam kolor, co boczny pasek */
+    background-color: #222; /* Kolor tła nagłówka, zmień na ten sam kolor, co boczny pasek */
     /* Przykład: jeśli boczny pasek ma inny kolor, zmień #f2f2f2 na odpowiedni kolor */
-    color: #000; /* Kolor tekstu w nagłówku */
+    color: #ffffff; /* Kolor tekstu w nagłówku */
 }
 
 .summary-table td:first-child {
-    background-color: #f2f2f2; /* Dopasowanie bocznego paska */
-    color: #000; /* Kolor tekstu w bocznej kolumnie */
+    background-color: #222; /* Dopasowanie bocznego paska */
+    color: #ffffff; /* Kolor tekstu w bocznej kolumnie */
     font-weight: bold; /* Wytłuszczony tekst */
 }
 .nav-container {
