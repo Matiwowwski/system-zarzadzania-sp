@@ -223,7 +223,7 @@ const isCorrectTime = () => {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     
-    return hours === 15 && minutes === 32;
+    return hours === 15 && minutes === 38;
 };
 
 // Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
