@@ -221,28 +221,34 @@ const getUserId = (employee) => {
 const isCorrectTime = () => {
     const now = new Date();
     
-    // Ustawienie opcji do formatu amerykańskiego
+    // Ustawienie opcji do formatu amerykańskiego (12-godzinna) dla strefy 'Europe/Warsaw'
     const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
     
     // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
     const timeString = now.toLocaleString('en-US', options);
 
-    // Sprawdzenie, czy godzina to 3:32 PM
+    // Sprawdzenie, czy godzina to 5:57 PM
     return timeString === '5:57 PM';
 };
 
-// Funkcja, która sprawdza godzinę co minutę
+// Funkcja, która sprawdza czas co minutę między 17:00 a 17:59
 const checkTimeEveryMinute = () => {
     setInterval(() => {
-        if (isCorrectTime()) {
-            console.log("It's 5:14 PM in Warsaw!");
-        } else {
-            console.log("It's not 5:14 PM yet.");
-        }
+        const now = new Date();
+        const currentHour = now.getHours();
+        
+        // Sprawdzenie, czy jest między 17:00 a 17:59
+        if (currentHour === 17) {
+            if (isCorrectTime()) {
+                console.log("It's exactly 5:57 PM in Warsaw!");
+            } else {
+                console.log("It's between 5:00 PM and 5:59 PM, but not 5:57 PM.");
+            }
+        } 
     }, 60000); // 60000 ms = 1 minuta
 };
 
-// Wywołaj funkcję, aby rozpocząć sprawdzanie
+// Uruchomienie sprawdzania czasu
 checkTimeEveryMinute();
 
 // Testowanie funkcji isCorrectTime
