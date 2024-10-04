@@ -228,28 +228,46 @@ const isCorrectTime = () => {
     const timeString = now.toLocaleString('en-US', options);
 
     // Sprawdzenie, czy godzina to 5:57 PM
-    return timeString === '5:57 PM';
+    return timeString === '8:00 PM';
 };
 
-// Funkcja, która sprawdza czas co minutę między 17:00 a 17:59
+// Funkcja sprawdzająca, czy jest między 17:00 a 17:59
 const checkTimeEveryMinute = () => {
-    setInterval(() => {
-        const now = new Date();
-        const currentHour = now.getHours();
-        
-        // Sprawdzenie, czy jest między 17:00 a 17:59
-        if (currentHour === 17) {
+    const now = new Date();
+    const currentHour = now.getHours();
+
+    // Sprawdzenie, czy jest między 17:00 a 17:59
+    if (currentHour === 20) {
+        const intervalId = setInterval(() => {
             if (isCorrectTime()) {
                 console.log("It's exactly 5:57 PM in Warsaw!");
             } else {
                 console.log("It's between 5:00 PM and 5:59 PM, but not 5:57 PM.");
             }
-        } 
+        }, 60000); // 60000 ms = 1 minuta
+
+        // Zatrzymanie interwału po 17:59
+        setTimeout(() => clearInterval(intervalId), (60 - now.getMinutes()) * 60000); 
+    } else {
+        console.log("It's outside of the 5:00 PM - 5:59 PM window.");
+    }
+};
+
+// Funkcja monitorująca czas, aby sprawdzić godzinę na początku każdej pełnej godziny
+const monitorTime = () => {
+    setInterval(() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+
+        // Sprawdzamy tylko o pełnych godzinach, czy godzina to 17
+        if (currentHour === 20) {
+            checkTimeEveryMinute();
+        }
     }, 60000); // 60000 ms = 1 minuta
 };
 
-// Uruchomienie sprawdzania czasu
-checkTimeEveryMinute();
+// Uruchomienie monitorowania czasu
+monitorTime();
 
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
@@ -318,7 +336,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
-cron.schedule('* 17 * * *', async () => {
+cron.schedule('* 20 * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -404,7 +422,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('* 17 * * *', async () => {
+cron.schedule('* 20 * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
