@@ -10,6 +10,7 @@ const PORT = 5000;
 const Workday = require('./models/Workday'); // Zakładając, że masz folder models i plik Workday.js
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const cron = require('node-cron');
+require('dotenv').config();
 
 const cors = require('cors');
 app.use(cors());
@@ -43,7 +44,7 @@ function checkAuth(req, res, next) {
 }
 
 // Połączenie z MongoDB
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://matiwitkowski311:qkaXQmxTwfyc5ol0@cluster0.ter8xk2.mongodb.net/IREX'; // Użyj swojej URI
+const mongoURI = process.env.MONGO_URI; // Użyj swojej URI
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Połączono z MongoDB'))
     .catch(err => console.error('Błąd połączenia z MongoDB:', err));
@@ -85,11 +86,10 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/api/username', (req, res) => {
-    console.log('Sesja:', req.session); // Loguje całą sesję, aby zobaczyć, co zawiera
-    if (req.session.user && req.session.user.username) {
-        res.json({ username: req.session.user.username });
+    if (req.session.user) {
+        return res.json({ username: req.session.user.username });
     } else {
-        res.json({ username: null });
+        return res.json({ username: null });
     }
 });
 
@@ -218,77 +218,10 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
-const isCorrectTime = () => {
-    const now = new Date();
-    
-    // Ustawienie opcji do formatu amerykańskiego (12-godzinna) dla strefy 'Europe/Warsaw'
-    const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
-    
-    // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
-    const timeString = now.toLocaleString('en-US', options);
-
-    // Sprawdzenie, czy godzina to 5:57 PM
-    return timeString === '8:00 PM';
-};
-
-// Funkcja sprawdzająca, czy jest między 17:00 a 17:59
-const checkTimeEveryMinute = () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-
-    // Sprawdzenie, czy jest między 17:00 a 17:59
-    if (currentHour === 20) {
-        const intervalId = setInterval(() => {
-            if (isCorrectTime()) {
-                console.log("It's exactly 5:57 PM in Warsaw!");
-            } else {
-                console.log("It's between 5:00 PM and 5:59 PM, but not 5:57 PM.");
-            }
-        }, 60000); // 60000 ms = 1 minuta
-
-        // Zatrzymanie interwału po 17:59
-        setTimeout(() => clearInterval(intervalId), (60 - now.getMinutes()) * 60000); 
-    } else {
-        console.log("It's outside of the 5:00 PM - 5:59 PM window.");
-    }
-};
-
-// Funkcja monitorująca czas, aby sprawdzić godzinę na początku każdej pełnej godziny
-const monitorTime = () => {
-    setInterval(() => {
-        const now = new Date();
-        const currentHour = now.getHours();
-
-        // Sprawdzamy tylko o pełnych godzinach, czy godzina to 17
-        if (currentHour === 20) {
-            checkTimeEveryMinute();
-        }
-    }, 60000); // 60000 ms = 1 minuta
-};
-
-// Uruchomienie monitorowania czasu
-monitorTime();
-
-// Testowanie funkcji isCorrectTime
-console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
-
 // Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
 const sendNotification = async (employee, formattedDate, reportNumber) => {
-    if (!isCorrectTime()) {
-        console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
-        return;
-    }
-
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
-        
-        // Oblicz timestamp na północ za 5 dni
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + 6); // Ustaw datę na 5 dni do przodu
-        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
-
-        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
-
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
             embeds: [
@@ -300,11 +233,6 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
                         {
                             name: "Zakres sprawdzania:",
                             value: `${reportNumber}`,
-                            inline: true
-                        },
-                        {
-                            name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na północ za 5 dni
                             inline: true
                         }
                     ],
@@ -326,8 +254,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
-            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
+            throw new Error(`Wystąpił błąd: ${response.statusText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
     } catch (error) {
@@ -335,8 +262,8 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
-cron.schedule('* 20 * * *', async () => {
+// Zaplanuj zadanie na północ każdego dnia
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -347,7 +274,7 @@ cron.schedule('* 20 * * *', async () => {
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij wiadomość pingując pracownika z embedem, jeśli jest 15:20
+                // Wyślij wiadomość pingując pracownika z embedem
                 await sendNotification(workday.employee, formattedDate, workday.reportNumber);
             }
         } else {
@@ -360,21 +287,8 @@ cron.schedule('* 20 * * *', async () => {
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
-    if (!isCorrectTime()) {
-        console.log('Nieprawidłowa godzina. Przypomnienie nie zostanie wysłane.');
-        return;
-    }
-
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
-
-        // Oblicz timestamp na północ następnego dnia
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + 1); // Ustaw datę na następny dzień
-        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
-
-        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
-
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID
             embeds: [
@@ -386,11 +300,6 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                         {
                             name: "Zakres sprawdzania:",
                             value: `${reportNumber}`,
-                            inline: true
-                        },
-                        {
-                            name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na północ następnego dnia
                             inline: true
                         }
                     ],
@@ -412,8 +321,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
-            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
+            throw new Error(`Wystąpił błąd: ${response.statusText}`);
         }
         console.log('Przypomnienie wysłane pomyślnie!');
     } catch (error) {
@@ -421,8 +329,8 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('* 20 * * *', async () => {
+// Zaplanuj przypomnienie na 5 dni po dacie zadania
+cron.schedule('08 23 * * *', async () => { // Ustawione na codziennie o północy
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
@@ -436,7 +344,7 @@ cron.schedule('* 20 * * *', async () => {
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij przypomnienie pingując pracownika, jeśli jest 15:20
+                // Wyślij przypomnienie pingując pracownika
                 await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
         } else {
