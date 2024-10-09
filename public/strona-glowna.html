@@ -3,118 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Główna</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
+    <title>Innowacyjny Panel</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; /* Ciemne tło */
-            color: #ffffff; /* Jasny kolor tekstu */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .header {
-            background-color: #1e1e1e; /* Ciemny kolor nagłówka */
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            position: fixed; /* Przyklejony do góry */
-            top: 0; /* Ustawienie na górze */
-            z-index: 1000; /* Upewnienie się, że nagłówek jest nad innymi elementami */
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.5em;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1c1c1c, #323232); /* Gradient tła */
             color: #ffffff;
-        }
-
-        .header p {
-            margin: 5px 0 0;
-            font-size: 1.2em;
-            color: #b0b0b0; /* Jasnoszary kolor */
-        }
-
-        .button-container {
+            margin: 0;
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            padding: 100px 40px 40px; /* Umożliwienie miejsca dla nagłówka */
-            gap: 20px; /* Odstępy między kafelkami */
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .btn {
-            background-color: #4a90e2; /* Kolor przycisku */
-            color: #fff;
-            padding: 20px;
-            border: none;
-            border-radius: 10px;
+        .container {
+            position: relative;
+            background: radial-gradient(circle, #262626, #1c1c1c); /* Efekt radialny */
+            border-radius: 50%; /* Pełne zaokrąglenie */
+            width: 450px;
+            height: 450px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7); /* Głębszy cień */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1); /* Subtelny efekt powiększenia po najechaniu */
+        }
+
+        .wave {
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent);
+            border-radius: 50%;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
             text-align: center;
-            text-decoration: none;
-            font-size: 1.5em;
-            width: 250px; /* Zwiększona szerokość kafelka */
-            transition: background-color 0.3s, transform 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
-        .btn:hover {
-            background-color: #2b5688; /* Ciemniejszy kolor przycisku po najechaniu */
-            transform: translateY(-5px); /* Efekt unoszenia */
+        h2 {
+            font-size: 2.2em;
+            color: #4a90e2;
+            margin: 0;
+        }
+
+        .btn-circle {
+            background-color: #4a90e2;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px; /* Zaokrąglony kształt przycisku */
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+            margin-top: 20px;
+        }
+
+        .btn-circle:hover {
+            background-color: #357ABD;
+            transform: translateY(-3px);
         }
 
         .footer {
-            background-color: #1e1e1e; /* Ciemny kolor stopki */
-            color: #ffffff; /* Jasny kolor tekstu */
-            text-align: center;
-            padding: 20px;
             position: absolute;
-            bottom: 0;
+            bottom: 20px;
             width: 100%;
-        }
-
-        .footer p {
-            margin: 0;
+            text-align: center;
             font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Witamy w systemie zarządzania!</h1>
-        <p id="username"></p>
-    </div>
-    <div class="button-container">
-        <a href="grafik.html" class="btn">Grafik Pracy</a>
-        <a href="zarzadzanie-powiadomieniami.html" class="btn">Zarządzanie Powiadomieniami</a>
+    <div class="container">
+        <div class="wave"></div> <!-- Ruchoma fala -->
+        <div class="content">
+            <h2 id="username"></h2> <!-- Powitanie -->
+            <button class="btn-circle" id="grafik">Grafik</button><br>
+            <button class="btn-circle" id="powiadomienia">Zarządzanie Powiadomieniami</button><br>
+            <form action="/logout" method="POST" style="display: inline;">
+                <button type="submit" class="btn-circle">Wyloguj</button>
+            </form>
+        </div>
     </div>
     <div class="footer">
-        <p>&copy; 2024 VZTM Szczecin</p>
+        &copy; 2024 VZTM Szczecin
     </div>
-    <script>
-        // Funkcja pobierająca username z serwera
-        async function getUsername() {
-            try {
-                const response = await fetch('/api/username'); // Upewnij się, że endpoint jest poprawny
-                const data = await response.json();
-                return data.username || null; // Zwróć nazwę użytkownika lub null
-            } catch (error) {
-                console.error('Błąd podczas pobierania username:', error);
-                return null; // Zwróć null w przypadku błędu
+
+<script>
+    // Obsługa kliknięć na przyciski
+    document.getElementById('grafik').addEventListener('click', () => {
+        window.location.href = 'grafik.html'; // Przekierowanie na stronę grafiku
+    });
+
+    document.getElementById('powiadomienia').addEventListener('click', () => {
+        window.location.href = 'zarzadzanie-powiadomieniami.html'; // Przekierowanie na stronę zarządzania powiadomieniami
+    });
+</script>
+<script>
+    // Funkcja pobierająca username z serwera
+    async function getUsername() {
+        try {
+            const response = await fetch('/api/username'); // Upewnij się, że endpoint jest poprawny
+            if (!response.ok) {
+                throw new Error('Network response was not ok'); // Sprawdzenie, czy odpowiedź jest poprawna
             }
+            const data = await response.json();
+            console.log('Pobrano username:', data.username); // Loguje pobraną nazwę użytkownika
+            return data.username || null; // Zwróć nazwę użytkownika lub null
+        } catch (error) {
+            console.error('Błąd podczas pobierania username:', error);
+            return null; // Zwróć null w przypadku błędu
+        }
+    }
+</script>
+<script>
+    // Wyświetlanie powitania z nazwą użytkownika
+    (async () => {
+        const username = await getUsername();
+        const usernameElement = document.getElementById('username');
+
+        // Logowanie statusu
+        if (username) {
+            console.log('Nazwa użytkownika jest dostępna.');
+        } else {
+            console.log('Nazwa użytkownika nie jest dostępna.');
         }
 
-        // Wyświetlanie powitania z nazwą użytkownika
-        (async () => {
-            const username = await getUsername();
-            const usernameElement = document.getElementById('username');
-            usernameElement.textContent = username ? `Cześć ${username}! Życzę Ci miłej pracy w systemie!` : `Witamy w systemie zarządzania!`;
-        })();
-    </script>
+        // Ustawia tylko "Witaj {username}" lub "Witaj w systemie"
+        usernameElement.textContent = username ? `Witaj ${username}!` : 'Witaj w systemie!';
+    })();
+</script>
+<script src="checkAuth.js"></script>
 </body>
 </html>

@@ -84,7 +84,12 @@ const updateWorkday = async (workdayId, updatedData) => {
         const result = await response.json();
         console.log('Dane zaktualizowane:', result);
         closeEditModal(); // Zamknij modal po pomyślnym zaktualizowaniu
-        // Tutaj możesz zaktualizować widok w aplikacji, np. przeładowując dane
+
+        // Wyświetl alert i odśwież wpisy w kalendarzu
+        alert('Wpis został pomyślnie zaktualizowany!');
+        await displayWorkdays(); // Odśwież dane w kalendarzu
+        await updateMonthDisplay();
+        await renderWorkSummaryTable();
     } catch (error) {
         console.error('Błąd:', error);
     }
@@ -114,6 +119,12 @@ const deleteWorkday = async () => {
             const result = await response.json();
             console.log('Dane usunięte:', result);
             closeEditModal(); // Zamknij modal po pomyślnym usunięciu
+
+            // Wyświetl alert i odśwież wpisy w kalendarzu
+            alert('Wpis został pomyślnie usunięty!');
+            await displayWorkdays(); // Odśwież dane w kalendarzu
+            await updateMonthDisplay();
+            await renderWorkSummaryTable();
         } catch (error) {
             console.error('Błąd:', error);
         }

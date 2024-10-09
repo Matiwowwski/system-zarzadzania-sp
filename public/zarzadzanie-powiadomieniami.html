@@ -4,107 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zarządzanie Powiadomieniami</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Upewnij się, że ścieżka do CSS jest poprawna -->
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1c1c1c, #323232); /* Gradient tła */
             color: #ffffff;
             margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-        }
-
-        .header {
-            background-color: #1e1e1e;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            position: fixed;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            color: #ffffff;
-        }
-
-        .header p {
-            margin: 5px 0 0;
-            font-size: 1.2em;
-            color: #b0b0b0;
+            height: 100vh;
+            overflow: hidden;
+            flex-direction: column;
         }
 
         .container {
-            padding: 100px 20px 20px; /* Umożliwienie miejsca dla nagłówka */
-            width: 100%;
-            max-width: 600px; /* Maksymalna szerokość kontenera */
-            margin: auto;
+            background: radial-gradient(circle, #262626, #1c1c1c); /* Efekt radialny */
+            border-radius: 20px; /* Zaokrąglone krawędzie */
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7); /* Głębszy cień */
+            padding: 40px;
             text-align: center;
+            margin-top: 20px;
         }
 
-        .form-group {
+        h1 {
+            font-size: 2.5em;
+            color: #4a90e2;
             margin-bottom: 20px;
         }
 
-        .form-group label {
+        label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #b0b0b0;
         }
 
-        .form-group input, .form-group select {
+        select, input[type="number"], input[type="date"] {
             width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
             background-color: #2a2a2a;
             color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 1em;
         }
 
-        .form-group button {
+        .btn-circle {
             background-color: #4a90e2;
-            color: #fff;
-            padding: 15px;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px; /* Zaokrąglony kształt przycisku */
             border: none;
-            border-radius: 5px;
             font-size: 1.2em;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+            margin-top: 20px;
+            width: 100%;
         }
 
-        .form-group button:hover {
-            background-color: #2b5688;
-            transform: translateY(-2px);
+        .btn-circle:hover {
+            background-color: #357ABD;
+            transform: translateY(-3px);
         }
 
         .footer {
-            background-color: #1e1e1e;
-            color: #ffffff;
+            background-color: transparent;
             text-align: center;
-            padding: 20px;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
+            color: #ffffff;
+            margin-top: 20px;
+            position: relative;
+    bottom: 0;
+    width: 100%;
         }
 
         .footer p {
-            margin: 0;
             font-size: 0.9em;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Zarządzanie powiadomieniami</h1>
-    </div>
     <div class="container">
+        <h1>Zarządzanie Powiadomieniami</h1>
         <div class="form-group">
             <label for="template">Wybierz szablon powiadomienia:</label>
             <select id="template" onchange="toggleFields()">
@@ -143,9 +130,7 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <button onclick="sendNotification()">Wyślij Powiadomienie</button>
-        </div>
+        <button class="btn-circle" onclick="sendNotification()">Wyślij Powiadomienie</button>
     </div>
     
     <div class="footer">
@@ -205,5 +190,6 @@
         }
     </script>
     <script src="sendNotification.js"></script>
+    <script src="checkAuth.js"></script>
 </body>
 </html>
