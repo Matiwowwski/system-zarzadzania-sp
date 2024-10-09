@@ -16,9 +16,12 @@ const sendFormData = async (formData) => {
         }
 
         alert('Dane zostały pomyślnie wysłane!');
-        location.reload(); // Odśwież stronę po pomyślnym wysłaniu danych
+        
+        // Wywołanie funkcji displayWorkdays() oraz renderWorkSummaryTable() po wysłaniu danych
+        await displayWorkdays();  
+        window.closeModal(); // Zamknij modal po wysłaniu
     } catch (error) {
-        console.error('Error sending data:', error);
+        console.error('Błąd podczas wysyłania danych:', error);
         alert('Wystąpił błąd podczas wysyłania danych. Sprawdź konsolę, aby uzyskać więcej informacji.');
     }
 };
@@ -39,5 +42,4 @@ document.getElementById('eventForm').addEventListener('submit', function (event)
     };
 
     sendFormData(formData);
-    window.closeModal(); // Zamknij modal po wysłaniu
 });

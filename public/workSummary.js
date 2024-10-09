@@ -47,26 +47,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         summaryContainer.innerHTML = ''; // Czyścimy poprzednią tabelę
         const table = document.createElement('table');
         table.classList.add('summary-table');
-
+    
         // Tworzenie nagłówka
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
         const emptyHeaderCell = document.createElement('th');
         emptyHeaderCell.textContent = 'Kategoria/Pracownik';
         headerRow.appendChild(emptyHeaderCell);
-
+    
         employees.forEach(employee => {
             const th = document.createElement('th');
             th.textContent = employee;
             headerRow.appendChild(th);
         });
-
+    
         thead.appendChild(headerRow);
         table.appendChild(thead);
-
+    
         // Pobierz dane z endpointu i filtruj je według wybranego miesiąca
         const workdays = await fetchData();
-
+    
         // Tworzenie obiektu do przechowywania sum godzin
         const hoursSummary = {};
         employees.forEach(employee => {
@@ -78,44 +78,49 @@ document.addEventListener('DOMContentLoaded', async function () {
             };
         });
 
-        // Obliczanie godzin na podstawie danych
-        workdays.forEach(entry => {
-            const { employee, task, leaveType } = entry;
-        
-            if (task === 'sprawdzanieRaportów') {
-                hoursSummary[employee]['Godziny pracy'] += 8; // Dodaj 8 godzin do "Godziny pracy"
-            } else if (leaveType === 'płatny') {
-                hoursSummary[employee]['Urlop płatny'] += 8; // Dodaj 8 godzin do "Urlop płatny"
-            } else if (leaveType === 'bezpłatny') {
-                hoursSummary[employee]['Urlop bezpłatny'] += 8; // Dodaj 8 godzin do "Urlop bezpłatny"
-            } else {
-                hoursSummary[employee]['Pozostałe wydarzenia'] += 8; // Dodaj 8 godzin do "Pozostałe wydarzenia"
-            }
-        });        
+ // Obliczanie godzin na podstawie danych
+ workdays.forEach(entry => {
+    const { employee, task, leaveType } = entry;
 
-        // Tworzenie wierszy dla każdej kategorii
-        const tbody = document.createElement('tbody');
-        categories.forEach(category => {
-            const row = document.createElement('tr');
-        
-            const categoryCell = document.createElement('td');
-            categoryCell.textContent = category;
-            row.appendChild(categoryCell);
-        
-            employees.forEach(employee => {
-                const dataCell = document.createElement('td');
-                const hours = hoursSummary[employee][category] || 0;
-                dataCell.textContent = `${hours} godzin`; // Formatowanie liczby godzin jako "X godzin"
-                row.appendChild(dataCell);
-            });
-        
-            tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        summaryContainer.appendChild(table);
-        accordionContainer.appendChild(summaryContainer);
-    };
+    if (!employee || !task) {
+        console.error(`Brak danych dla wpisu: ${JSON.stringify(entry)}`);
+        return; // Pomijamy niekompletne wpisy
+    }
 
+    if (task === 'sprawdzanieRaportów') {
+        hoursSummary[employee]['Godziny pracy'] += 8; // Dodaj 8 godzin do "Godziny pracy"
+    } else if (leaveType === 'płatny') {
+        hoursSummary[employee]['Urlop płatny'] += 8; // Dodaj 8 godzin do "Urlop płatny"
+    } else if (leaveType === 'bezpłatny') {
+        hoursSummary[employee]['Urlop bezpłatny'] += 8; // Dodaj 8 godzin do "Urlop bezpłatny"
+    } else {
+        hoursSummary[employee]['Pozostałe wydarzenia'] += 8; // Dodaj 8 godzin do "Pozostałe wydarzenia"
+    }
+});
+
+// Tworzenie wierszy dla każdej kategorii
+const tbody = document.createElement('tbody');
+categories.forEach(category => {
+    const row = document.createElement('tr');
+
+    const categoryCell = document.createElement('td');
+    categoryCell.textContent = category;
+    row.appendChild(categoryCell);
+
+    employees.forEach(employee => {
+        const dataCell = document.createElement('td');
+        const hours = hoursSummary[employee][category] || 0;
+        dataCell.textContent = `${hours} godzin`; // Formatowanie liczby godzin jako "X godzin"
+        row.appendChild(dataCell);
+    });
+
+    tbody.appendChild(row);
+});
+
+table.appendChild(tbody);
+summaryContainer.appendChild(table);
+accordionContainer.appendChild(summaryContainer);
+};
     // Funkcje do obsługi przycisków nawigacji między miesiącami
     const handlePreviousMonth = () => {
         if (currentMonth === 0) {

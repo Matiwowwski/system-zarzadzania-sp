@@ -21,6 +21,11 @@ const displayWorkdays = async () => {
 
         console.log('Dni pracy pomyślnie pobrane z serwera:', workdaysData);
 
+        // Najpierw wyczyść tylko elementy związane z dniami pracy, a nie całą zawartość komórek
+        document.querySelectorAll('.day .workday-entry').forEach(entry => {
+            entry.remove(); // Usuwamy tylko elementy z klasą "workday-entry", nie modyfikujemy innych elementów
+        });
+
         // Iteracja po wszystkich dniach pracy
         workdaysData.forEach(workday => {
             if (!workday.cellId || !workday.employee || !workday.date || !workday.task) {
@@ -58,30 +63,30 @@ const displayWorkdays = async () => {
 
                 accordionHeader.innerHTML = headerContent; // Ustawiamy zawartość nagłówka
 
-// Zastosowanie klas kolorów w zależności od typu zadania
-if (workday.task === 'sprawdzanieRaportów') {
-    accordionHeader.classList.add('red'); // Dodanie klasy czerwonej dla sprawdzania raportów
-} else if (workday.task === 'urlop') {
-    accordionHeader.classList.add('blue'); // Dodanie klasy niebieskiej dla urlopu
-} else if (workday.task === 'dyżur') {
-    accordionHeader.classList.add('yellow'); // Dodanie klasy żółtej dla dyżuru
-} else if (workday.task === 'dzień wolny nienaruszalny') {
-    accordionHeader.classList.add('green'); // Dodanie klasy zielonej dla dnia wolnego
-} else if (workday.task === 'nieobecność nieusprawiedliwiona') {
-    accordionHeader.classList.add('orange'); // Dodanie klasy pomarańczowej dla nieusprawiedliwionej nieobecności
-} else if (workday.task === 'szkolenie') {
-    accordionHeader.classList.add('purple'); // Dodanie klasy fioletowej dla szkolenia
-} else if (workday.task === 'zastępstwo') {
-    accordionHeader.classList.add('pink'); // Dodanie klasy różowej dla zastępstwa
-} else if (workday.task === 'zawieszenie') {
-    accordionHeader.classList.add('gray'); // Dodanie klasy szarej dla zawieszenia
-} else if (workday.task === 'oddelegowanie') {
-    accordionHeader.classList.add('cyan'); // Dodanie klasy cyjanowej dla oddelegowania
-} else if (workday.task === 'inne czynności służbowe') {
-    accordionHeader.classList.add('light-blue'); // Dodanie klasy jasnoniebieskiej dla innych czynności
-} else {
-    accordionHeader.style.backgroundColor = '#ddd'; // Domyślny kolor dla innych zadań
-}
+                // Zastosowanie klas kolorów w zależności od typu zadania
+                if (workday.task === 'sprawdzanieRaportów') {
+                    accordionHeader.classList.add('red');
+                } else if (workday.task === 'urlop') {
+                    accordionHeader.classList.add('blue');
+                } else if (workday.task === 'dyżur') {
+                    accordionHeader.classList.add('yellow');
+                } else if (workday.task === 'dzień wolny nienaruszalny') {
+                    accordionHeader.classList.add('green');
+                } else if (workday.task === 'nieobecność nieusprawiedliwiona') {
+                    accordionHeader.classList.add('orange');
+                } else if (workday.task === 'szkolenie') {
+                    accordionHeader.classList.add('purple');
+                } else if (workday.task === 'zastępstwo') {
+                    accordionHeader.classList.add('pink');
+                } else if (workday.task === 'zawieszenie') {
+                    accordionHeader.classList.add('gray');
+                } else if (workday.task === 'oddelegowanie') {
+                    accordionHeader.classList.add('cyan');
+                } else if (workday.task === 'inne czynności służbowe') {
+                    accordionHeader.classList.add('light-blue');
+                } else {
+                    accordionHeader.style.backgroundColor = '#ddd'; // Domyślny kolor dla innych zadań
+                }
 
                 // Dodanie treści zadania w rozwijanej części akordeonu
                 const accordionContent = document.createElement('div');

@@ -85,9 +85,11 @@ const updateWorkday = async (workdayId, updatedData) => {
         console.log('Dane zaktualizowane:', result);
         closeEditModal(); // Zamknij modal po pomyślnym zaktualizowaniu
 
-        // Wyświetl alert i odśwież stronę
+        // Wyświetl alert i odśwież wpisy w kalendarzu
         alert('Wpis został pomyślnie zaktualizowany!');
-        location.reload();
+        await displayWorkdays(); // Odśwież dane w kalendarzu
+        await updateMonthDisplay();
+        await renderWorkSummaryTable();
     } catch (error) {
         console.error('Błąd:', error);
     }
@@ -118,9 +120,11 @@ const deleteWorkday = async () => {
             console.log('Dane usunięte:', result);
             closeEditModal(); // Zamknij modal po pomyślnym usunięciu
 
-            // Wyświetl alert i odśwież stronę
+            // Wyświetl alert i odśwież wpisy w kalendarzu
             alert('Wpis został pomyślnie usunięty!');
-            location.reload();
+            await displayWorkdays(); // Odśwież dane w kalendarzu
+            await updateMonthDisplay();
+            await renderWorkSummaryTable();
         } catch (error) {
             console.error('Błąd:', error);
         }
