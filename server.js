@@ -218,18 +218,17 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
-const isCorrectTime = () => {
-    const now = new Date();
-    
-    // Ustawienie opcji do formatu amerykańskiego (12-godzinna) dla strefy 'Europe/Warsaw'
-    const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
-    
-    // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
-    const timeString = now.toLocaleString('en-US', options);
+const moment = require('moment-timezone');
 
-    // Sprawdzenie, czy godzina to 5:57 PM
-    return timeString === '(9:30 PM';
+const isCorrectTime = () => {
+    const now = moment().tz('Europe/Warsaw');
+    
+    // Sprawdzenie, czy godzina to 17:57
+    return now.format('h:mm A') === '6:11 PM';
 };
+
+console.log(isCorrectTime());
+
 
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
@@ -298,7 +297,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
-cron.schedule('*/1 21-22 * * *', async () => {
+cron.schedule('*/1 18-19 * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -384,7 +383,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('*/1 21-22 * * *', async () => {
+cron.schedule('*/1 18-19 * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
