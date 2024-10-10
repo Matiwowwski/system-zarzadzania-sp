@@ -233,9 +233,20 @@ const isCorrectTime = () => {
 
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
-    // Sprawdzenie, czy jest 12:17 AM
-    return hours === 12 && minutes === 41 && period === 'AM';
+    // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
+    return hours === 12 && minutes === 47 && period === 'AM';
 };
+
+// Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
+cron.schedule('*/1 0-1 * * *', async () => {
+    if (isCorrectTime()) {
+        // Twoja logika do wykonania, gdy czas to 00:45
+        console.log('Czas jest 00:45, wykonaj akcję.');
+    } else {
+        console.log('Czas nie jest 00:45, akcja nie zostanie wykonana.');
+    }
+});
+
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
@@ -303,7 +314,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
-cron.schedule('* 0-1 * * *', async () => {
+cron.schedule('* * * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-US', { timeZone: 'Europe/Warsaw' }); // Użyj formatu amerykańskiego z czasem w Warszawie
     const [month, day, year] = formattedDate.split('/'); // Rozdziel datę na miesiąc, dzień i rok
@@ -391,7 +402,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('* 0-1 * * *', async () => {
+cron.schedule('* * * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
