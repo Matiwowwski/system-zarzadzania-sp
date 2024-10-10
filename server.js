@@ -219,23 +219,18 @@ const getUserId = (employee) => {
 };
 
 const isCorrectTime = () => {
-    // Pobranie aktualnej daty i godziny w formacie 12-godzinnym z AM/PM dla strefy 'Europe/Warsaw'
-    const now = new Date().toLocaleString('en-US', {
-        timeZone: 'Europe/Warsaw',
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true
-    });
+    const now = new Date();
+    
+    // Ustawienie opcji do formatu amerykańskiego (12-godzinna) dla strefy 'Europe/Warsaw'
+    const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
+    
+    // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
+    const timeString = now.toLocaleString('en-US', options);
 
-    // Rozbijanie godziny na godzinę, minutę i AM/PM
-    const [time, period] = now.split(' ');
-    const [hours, minutes] = time.split(':').map(Number);
-
-    console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
-
-    // Sprawdzenie, czy jest 12:17 AM
-    return hours === 12 && minutes === 24 && period === 'AM';
+    // Sprawdzenie, czy godzina to 5:57 PM
+    return timeString === '12:32 AM';
 };
+
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
