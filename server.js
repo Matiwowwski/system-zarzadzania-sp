@@ -234,11 +234,11 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 12 && minutes === 49 && period === 'AM';
+    return hours === 12 && minutes === 54 && period === 'AM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
-cron.schedule('*/1 0-1 * * *', async () => {
+cron.schedule('* * * * *', async () => {
     if (isCorrectTime()) {
         // Twoja logika do wykonania, gdy czas to 00:45
         console.log('Czas jest 00:45, wykonaj akcję.');
@@ -316,19 +316,19 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* * * * *', async () => {
     const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', { timeZone: 'Europe/Warsaw' }); // Użyj formatu amerykańskiego z czasem w Warszawie
-    const [month, day, year] = formattedDate.split('/'); // Rozdziel datę na miesiąc, dzień i rok
-    const americanDateFormat = `${month}/${day}/${year}`; // Stwórz format MM/DD/YYYY
+    const formattedDate = today.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' }); // Użyj formatu polskiego z czasem w Warszawie
+    const [day, month, year] = formattedDate.split('.'); // Rozdziel datę na dzień, miesiąc i rok
+    const polishDateFormat = `${year}-${month}-${day}`; // Stwórz format YYYY-MM-DD
 
     try {
         // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
-        const workdays = await Workday.find({ date: americanDateFormat, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na dzień ${americanDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
+        const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
                 // Wyślij wiadomość pingując pracownika
-                await sendNotification(workday.employee, americanDateFormat, workday.reportNumber);
+                await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
             }
         } else {
             console.log('Brak zadań "sprawdzanieRaportów" na dzisiaj.');
@@ -337,6 +337,7 @@ cron.schedule('* * * * *', async () => {
         console.error('Błąd podczas pobierania danych z bazy:', error);
     }
 });
+
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
@@ -402,25 +403,31 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
+// Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
 cron.schedule('* * * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
 
-    const formattedReminderDate = reminderDate.toLocaleDateString('en-US', { timeZone: 'Europe/Warsaw' }); // Formatowanie daty przypomnienia w formacie amerykańskim
+    // Formatowanie daty przypomnienia w formacie polskim
+    const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' });
+    
+    // Rozdzielenie daty na dzień, miesiąc i rok
+    const [day, month, year] = formattedReminderDate.split('.'); 
+    const polishDateFormat = `${year}-${month}-${day}`; // Stwórz format YYYY-MM-DD
 
     try {
         // Znajdź wszystkie wpisy, gdzie task to "sprawdzanieRaportów", a data jest 5 dni wcześniej
-        const workdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, workdays);
+        const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
                 // Wyślij przypomnienie pingując pracownika
-                await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
+                await sendReminder(workday.employee, polishDateFormat, workday.reportNumber);
             }
         } else {
-            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
+            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${polishDateFormat}).`);
         }
     } catch (error) {
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
