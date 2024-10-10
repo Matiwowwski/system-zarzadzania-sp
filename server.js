@@ -318,7 +318,7 @@ cron.schedule('* * * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' }); // Użyj formatu polskiego z czasem w Warszawie
     const [day, month, year] = formattedDate.split('.'); // Rozdziel datę na dzień, miesiąc i rok
-    const polishDateFormat = `${year}.${month}.${day}`; // Stwórz format YYYY-MM-DD
+    const polishDateFormat = `${day}.${month}.${year}`; // Stwórz format DD.MM.YYYY // Stwórz format YYYY-MM-DD
 
     try {
         // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
@@ -414,7 +414,7 @@ cron.schedule('* * * * *', async () => {
     
     // Rozdzielenie daty na dzień, miesiąc i rok
     const [day, month, year] = formattedReminderDate.split('.'); 
-    const polishDateFormat = `${year}.${month}.${day}`; // Stwórz format YYYY-MM-DD
+    const polishDateFormat = `${day}.${month}.${year}`; // Stwórz format DD.MM.YYYY
 
     try {
         // Znajdź wszystkie wpisy, gdzie task to "sprawdzanieRaportów", a data jest 5 dni wcześniej
