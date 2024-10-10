@@ -219,18 +219,23 @@ const getUserId = (employee) => {
 };
 
 const isCorrectTime = () => {
-    const now = new Date();
-    
-    // Ustawienie opcji do formatu amerykańskiego (12-godzinna) dla strefy 'Europe/Warsaw'
-    const options = { hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'Europe/Warsaw' };
-    
-    // Użycie .toLocaleString() do uzyskania godziny i minuty w formacie amerykańskim
-    const timeString = now.toLocaleString('en-US', options);
+    // Pobranie aktualnej daty i godziny w formacie 12-godzinnym z AM/PM dla strefy 'Europe/Warsaw'
+    const now = new Date().toLocaleString('en-US', {
+        timeZone: 'Europe/Warsaw',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    });
 
-    // Sprawdzenie, czy godzina to 5:57 PM
-    return timeString === '12:36 AM';
+    // Rozbijanie godziny na godzinę, minutę i AM/PM
+    const [time, period] = now.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+
+    console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
+
+    // Sprawdzenie, czy jest 12:17 AM
+    return hours === 12 && minutes === 23 && period === 'AM';
 };
-
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
@@ -297,20 +302,22 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
+// Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* 0-1 * * *', async () => {
     const today = new Date();
-    const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
+    const formattedDate = today.toLocaleDateString('en-US', { timeZone: 'Europe/Warsaw' }); // Użyj formatu amerykańskiego z czasem w Warszawie
+    const [month, day, year] = formattedDate.split('/'); // Rozdziel datę na miesiąc, dzień i rok
+    const americanDateFormat = `${month}/${day}/${year}`; // Stwórz format MM/DD/YYYY
 
     try {
         // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
-        const workdays = await Workday.find({ date: formattedDate, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na dzień ${formattedDate} z zadaniem "sprawdzanieRaportów":`, workdays);
+        const workdays = await Workday.find({ date: americanDateFormat, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na dzień ${americanDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij wiadomość pingując pracownika z embedem, jeśli jest 15:20
-                await sendNotification(workday.employee, formattedDate, workday.reportNumber);
+                // Wyślij wiadomość pingując pracownika
+                await sendNotification(workday.employee, americanDateFormat, workday.reportNumber);
             }
         } else {
             console.log('Brak zadań "sprawdzanieRaportów" na dzisiaj.');
@@ -389,7 +396,7 @@ cron.schedule('* 0-1 * * *', async () => {
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
 
-    const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL'); // Formatowanie daty przypomnienia
+    const formattedReminderDate = reminderDate.toLocaleDateString('en-US', { timeZone: 'Europe/Warsaw' }); // Formatowanie daty przypomnienia w formacie amerykańskim
 
     try {
         // Znajdź wszystkie wpisy, gdzie task to "sprawdzanieRaportów", a data jest 5 dni wcześniej
@@ -398,7 +405,7 @@ cron.schedule('* 0-1 * * *', async () => {
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij przypomnienie pingując pracownika, jeśli jest 15:20
+                // Wyślij przypomnienie pingując pracownika
                 await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
         } else {
@@ -408,7 +415,6 @@ cron.schedule('* 0-1 * * *', async () => {
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
     }
 });
-
 
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
