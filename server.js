@@ -219,18 +219,16 @@ const getUserId = (employee) => {
 };
 
 const isCorrectTime = () => {
-    const now = new Date();
+    // Pobranie aktualnej daty i godziny w strefie 'Europe/Warsaw'
+    const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Warsaw' });
+    const warsawTime = new Date(now);
     
-    // Ustawienie godziny i minuty w strefie 'Europe/Warsaw'
-    const options = { timeZone: 'Europe/Warsaw' };
-    const warsawTime = new Date(now.toLocaleString('en-US', options));
+    // Pobranie godziny i minuty
+    const hours = warsawTime.getHours(); // Zwraca godzinę (0-23)
+    const minutes = warsawTime.getMinutes(); // Zwraca minutę (0-59)
 
-    // Pobranie godziny i minuty z czasu warszawskiego
-    const hours = warsawTime.getHours(); // Zwraca 0-23 (godzina 24-godzinna)
-    const minutes = warsawTime.getMinutes();
-
-    // Sprawdzenie, czy jest godzina 17:57 (odpowiada 5:57 PM w formacie 12-godzinnym)
-    return hours === 18 && minutes === 25;
+    // Sprawdzenie, czy jest godzina 18:25 (czyli 17:25 UTC + 1 godzina dla strefy Warszawa)
+    return hours === 18 && minutes === 33;
 };
 
 // Testowanie funkcji isCorrectTime
