@@ -218,17 +218,20 @@ const getUserId = (employee) => {
     return userMap[employee] || employee; // Zwraca ID użytkownika, lub nazwę, jeśli nie ma w mapie
 };
 
-const moment = require('moment-timezone');
-
 const isCorrectTime = () => {
-    const now = moment().tz('Europe/Warsaw');
+    const now = new Date();
     
-    // Sprawdzenie, czy godzina to 17:57
-    return now.format('h:mm A') === '6:16 PM';
+    // Ustawienie godziny i minuty w strefie 'Europe/Warsaw'
+    const options = { timeZone: 'Europe/Warsaw' };
+    const warsawTime = new Date(now.toLocaleString('en-US', options));
+
+    // Pobranie godziny i minuty z czasu warszawskiego
+    const hours = warsawTime.getHours(); // Zwraca 0-23 (godzina 24-godzinna)
+    const minutes = warsawTime.getMinutes();
+
+    // Sprawdzenie, czy jest godzina 17:57 (odpowiada 5:57 PM w formacie 12-godzinnym)
+    return hours === 18 && minutes === 25;
 };
-
-console.log(isCorrectTime());
-
 
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
