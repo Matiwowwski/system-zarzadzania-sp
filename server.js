@@ -224,7 +224,7 @@ const isCorrectTime = () => {
     const now = moment().tz('Europe/Warsaw');
     
     // Sprawdzenie, czy godzina to 17:57
-    return now.format('h:mm A') === '6:11 PM';
+    return now.format('h:mm A') === '6:16 PM';
 };
 
 console.log(isCorrectTime());
