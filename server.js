@@ -219,18 +219,23 @@ const getUserId = (employee) => {
 };
 
 const isCorrectTime = () => {
-    // Pobranie aktualnej daty i godziny w strefie 'Europe/Warsaw'
-    const now = new Date().toLocaleString('en-US', { timeZone: 'Europe/Warsaw' });
-    const warsawTime = new Date(now);
-    
-    // Pobranie godziny i minuty
-    const hours = warsawTime.getHours(); // Zwraca godzinę (0-23)
-    const minutes = warsawTime.getMinutes(); // Zwraca minutę (0-59)
+    // Pobranie aktualnej daty i godziny w formacie 12-godzinnym z AM/PM dla strefy 'Europe/Warsaw'
+    const now = new Date().toLocaleString('en-US', {
+        timeZone: 'Europe/Warsaw',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    });
 
-    // Sprawdzenie, czy jest godzina 18:25 (czyli 17:25 UTC + 1 godzina dla strefy Warszawa)
-    return hours === 18 && minutes === 33;
+    // Rozbijanie godziny na godzinę, minutę i AM/PM
+    const [time, period] = now.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+
+    console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
+
+    // Sprawdzenie, czy jest 12:17 AM
+    return hours === 12 && minutes === 23 && period === 'AM';
 };
-
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
@@ -298,7 +303,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj zadanie na każdą minutę, ale blokuj wysyłanie, jeśli nie jest 15:20
-cron.schedule('*/1 18-19 * * *', async () => {
+cron.schedule('*/1 00-1 * * *', async () => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('pl-PL'); // Użyj formatu polskiego
 
@@ -384,7 +389,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 };
 
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('*/1 18-19 * * *', async () => {
+cron.schedule('*/1 00-1 * * *', async () => {
     const today = new Date();
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
