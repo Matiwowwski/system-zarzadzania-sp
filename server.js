@@ -228,7 +228,7 @@ const isCorrectTime = () => {
     const timeString = now.toLocaleString('en-US', options);
 
     // Sprawdzenie, czy godzina to 5:57 PM
-    return timeString === '12:35 AM';
+    return timeString === '12:36 AM';
 };
 
 // Testowanie funkcji isCorrectTime
