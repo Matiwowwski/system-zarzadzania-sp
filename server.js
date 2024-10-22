@@ -203,8 +203,8 @@ const webhookUrl = 'https://discord.com/api/webhooks/1289269499853406351/M0kHaRG
 
 // Mapa użytkowników
 const userMap = {
-    'Matiw': '805745794010579015',
     'SA-100': '528230911507038208', 
+    'PS-100': '637389583562309636',
     'SP-100': '665270450091458601', 
     'SP-101': '775738195241205770',
     'SP-102': '509475271871561734',
@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 12 && minutes === 16 && period === 'AM';
+    return hours === 9 && minutes === 55 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
