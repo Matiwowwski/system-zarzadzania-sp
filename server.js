@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 11 && minutes === 0 && period === 'PM';
+    return hours === 11 && minutes === 8 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -356,7 +356,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
 
         // Oblicz datę na 22:00 dnia poprzedniego
         const futureDate = new Date();
-        futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
+        futureDate.setUTCDate(futureDate.getUTCDate() + 1); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
 
         // Oblicz datę przypomnienia na 22:00 dnia poprzedniego
