@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 10 && minutes === 22 && period === 'PM';
+    return hours === 10 && minutes === 26 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -260,10 +260,15 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
         
-        // Oblicz timestamp na północ za 5 dni
+        // Oblicz datę na 22:00 dnia poprzedzającego termin
         const futureDate = new Date();
         futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+
+        // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
+        const notificationDate = new Date(futureDate);
+        notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
+        notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
 
@@ -349,10 +354,15 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
 
-        // Oblicz timestamp na północ następnego dnia
-       const futureDate = new Date();
-       futureDate.setUTCDate(futureDate.getUTCDate() + 1); // Ustaw datę na następny dzień
-futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+        // Oblicz datę na 22:00 dnia poprzedzającego termin
+        const futureDate = new Date();
+        futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
+        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+
+        // Oblicz datę przypomnienia na 22:00 dnia poprzedniego
+        const reminderDate = new Date(futureDate);
+        reminderDate.setUTCDate(reminderDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
+        reminderDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
 
@@ -371,7 +381,7 @@ futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na północ następnego dnia
+                            value: `<t:${timestamp}:R>`, // Timestamp na termin (5 dni do przodu)
                             inline: true
                         }
                     ],
