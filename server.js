@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 10 && minutes === 50 && period === 'PM';
+    return hours === 11 && minutes === 0 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -250,7 +250,6 @@ cron.schedule('* * * * *', async () => {
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
-// Funkcja do wysyłania powiadomień w formacie Discord Embed z pingiem pracownika
 const sendNotification = async (employee, formattedDate, reportNumber) => {
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
@@ -260,7 +259,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
         
-        // Oblicz datę na 22:00 dnia poprzedzającego termin
+        // Oblicz datę na 22:00 dnia poprzedniego
         const futureDate = new Date();
         futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
@@ -270,7 +269,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
         notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
-        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
+        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
 
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
@@ -287,7 +286,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na północ za 5 dni
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
                             inline: true
                         }
                     ],
@@ -317,6 +316,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         console.error('Błąd przy wysyłaniu wiadomości:', error);
     }
 };
+
 
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* * * * *', async () => {
@@ -354,7 +354,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
 
-        // Oblicz datę na 22:00 dnia poprzedzającego termin
+        // Oblicz datę na 22:00 dnia poprzedniego
         const futureDate = new Date();
         futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
@@ -364,7 +364,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
         reminderDate.setUTCDate(reminderDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
         reminderDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
-        const timestamp = Math.floor(futureDate.getTime() / 1000); // Konwertuj na sekundy
+        const timestamp = Math.floor(reminderDate.getTime() / 1000); // Użyj reminderDate do konwersji na sekundy
 
         const message = {
             content: `<@${userId}>`, // Ping użytkownika przez ID
@@ -381,7 +381,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na termin (5 dni do przodu)
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
                             inline: true
                         }
                     ],
@@ -412,7 +412,6 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
 // Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
 cron.schedule('* * * * *', async () => {
     const today = new Date();
