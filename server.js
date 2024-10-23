@@ -250,7 +250,10 @@ cron.schedule('* * * * *', async () => {
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
+console.log('Funkcja sendNotification została załadowana.');
+
 const sendNotification = async (employee, formattedDate, reportNumber) => {
+    console.log('Rozpoczynam funkcję sendNotification dla użytkownika:', employee);
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
         return;
@@ -258,26 +261,27 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
-        
+        console.log('Pobrane ID użytkownika:', userId);
+
         // Oblicz datę na 22:00 dnia poprzedniego
         const futureDate = new Date();
         futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
 
-        // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
         const notificationDate = new Date(futureDate);
         notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
         notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
+        console.log('Obliczony timestamp:', timestamp);
 
         const message = {
-            content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
+            content: `<@${userId}>`,
             embeds: [
                 {
                     title: "Powiadomienie!",
                     description: `Dzisiaj **(${formattedDate})** sprawdzasz/cie raporty!`,
-                    color: 3447003, // Kolor niebieski
+                    color: 3447003,
                     fields: [
                         {
                             name: "Zakres sprawdzania:",
@@ -286,7 +290,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
+                            value: `<t:${timestamp}:R>`,
                             inline: true
                         }
                     ],
@@ -297,9 +301,9 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
             ]
         };
 
-        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2));
 
-        const response = await fetch(webhookUrl, {
+        const response = await fetch(process.env.WEBHOOK_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -308,7 +312,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
+            const errorText = await response.text();
             throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
@@ -316,7 +320,6 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         console.error('Błąd przy wysyłaniu wiadomości:', error);
     }
 };
-
 
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* * * * *', async () => {
