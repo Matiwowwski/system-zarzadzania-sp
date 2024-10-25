@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 7 && minutes === 57 && period === 'PM';
+    return hours === 8 && minutes === 4 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -303,7 +303,9 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 
         console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2));
 
-        const response = await fetch(process.env.WEBHOOK_URL, {
+        const webhookUrl = 'https://discord.com/api/webhooks/1289269499853406351/M0kHaRGcwcufDc0isuzBl3cMmyOu8RNJfT-B49679xtv0KSxLzAEIKqzEXtQLLw0Suqz';
+
+        const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
