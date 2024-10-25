@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 8 && minutes === 12 && period === 'PM';
+    return hours === 8 && minutes === 21 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -250,10 +250,7 @@ cron.schedule('* * * * *', async () => {
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
-console.log('Funkcja sendNotification została załadowana.');
-
 const sendNotification = async (employee, formattedDate, reportNumber) => {
-    console.log('Rozpoczynam funkcję sendNotification dla użytkownika:', employee);
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
         return;
@@ -261,27 +258,26 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
 
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
-        console.log('Pobrane ID użytkownika:', userId);
-
+        
         // Oblicz datę na 22:00 dnia poprzedniego
         const futureDate = new Date();
         futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
         futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
 
+        // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
         const notificationDate = new Date(futureDate);
         notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
         notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
-        console.log('Obliczony timestamp:', timestamp);
 
         const message = {
-            content: `<@${userId}>`,
+            content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
             embeds: [
                 {
                     title: "Powiadomienie!",
                     description: `Dzisiaj **(${formattedDate})** sprawdzasz/cie raporty!`,
-                    color: 3447003,
+                    color: 3447003, // Kolor niebieski
                     fields: [
                         {
                             name: "Zakres sprawdzania:",
@@ -290,7 +286,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`,
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
                             inline: true
                         }
                     ],
@@ -301,9 +297,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
             ]
         };
 
-        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2));
-
-        const webhookUrl = 'https://discord.com/api/webhooks/1289269499853406351/M0kHaRGcwcufDc0isuzBl3cMmyOu8RNJfT-B49679xtv0KSxLzAEIKqzEXtQLLw0Suqz';
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
@@ -314,7 +308,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
+            const errorText = await response.text(); // Pobierz tekst błędu
             throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
@@ -322,6 +316,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         console.error('Błąd przy wysyłaniu wiadomości:', error);
     }
 };
+
 
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* * * * *', async () => {
@@ -360,14 +355,9 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
 
         // Oblicz datę na 22:00 dnia poprzedniego
-        const futureDate = new Date();
-        futureDate.setUTCDate(futureDate.getUTCDate() + 1); // Ustaw datę na 5 dni do przodu
-        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
-
-        // Oblicz datę przypomnienia na 22:00 dnia poprzedniego
-        const reminderDate = new Date(futureDate);
+        const reminderDate = new Date();
         reminderDate.setUTCDate(reminderDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
-        reminderDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
+        reminderDate.setUTCHours(22, 0, 0, 0); // Ustaw godziny na 22:00 UTC
 
         const timestamp = Math.floor(reminderDate.getTime() / 1000); // Użyj reminderDate do konwersji na sekundy
 
@@ -447,6 +437,7 @@ cron.schedule('* * * * *', async () => {
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
     }
 });
+
 
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
