@@ -41,8 +41,9 @@ function loadScriptWithErrorHandling(scriptSrc) {
 }
 
 function handleError() {
-    console.error("Błąd pobierania danych. Przekierowanie na https://system-zarzadzania-sp.onrender.com/.");
-    window.location.href = "https://system-zarzadzania-sp.onrender.com/"; // Przekierowanie na localhost:5000
+    console.error("Błąd pobierania danych. Przekierowanie na aktualny link.");
+    const baseUrl = window.location.origin + window.location.pathname.split('/')[0];
+    window.location.href = baseUrl; // Przekierowanie na zaktualizowany link
 }
 
 function showWhiteScreen() {
