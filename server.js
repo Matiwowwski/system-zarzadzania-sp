@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 8 && minutes === 54 && period === 'PM';
+    return hours === 12 && minutes === 0 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
