@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 8 && minutes === 30 && period === 'PM';
+    return hours === 8 && minutes === 41 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -354,10 +354,9 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee); // Uzyskaj ID użytkownika
 
-        // Oblicz datę na 22:00 dnia poprzedniego
+        // Oblicz datę na 22:00 dnia dzisiejszego
         const reminderDate = new Date();
-        reminderDate.setUTCDate(reminderDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
-        reminderDate.setUTCHours(23, 0, 0, 0); // Ustaw godziny na 22:00 UTC
+        reminderDate.setUTCHours(22, 0, 0, 0); // Ustaw godziny na 22:00 UTC
 
         const timestamp = Math.floor(reminderDate.getTime() / 1000); // Użyj reminderDate do konwersji na sekundy
 
@@ -376,7 +375,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia dzisiejszego
                             inline: true
                         }
                     ],
@@ -413,31 +412,25 @@ cron.schedule('* * * * *', async () => {
     const reminderDate = new Date();
     reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
 
-    // Formatowanie daty przypomnienia w formacie polskim
-    const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' });
-    
-    // Rozdzielenie daty na dzień, miesiąc i rok
-    const [day, month, year] = formattedReminderDate.split('.'); 
-    const polishDateFormat = `${day}.${month}.${year}`; // Stwórz format DD.MM.YYYY
+    const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL'); // Formatowanie daty przypomnienia
 
     try {
         // Znajdź wszystkie wpisy, gdzie task to "sprawdzanieRaportów", a data jest 5 dni wcześniej
-        const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
+        const workdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, workdays);
 
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij przypomnienie pingując pracownika
-                await sendReminder(workday.employee, polishDateFormat, workday.reportNumber);
+                // Wyślij przypomnienie pingując pracownika, jeśli jest 15:20
+                await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
         } else {
-            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${polishDateFormat}).`);
+            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
         }
     } catch (error) {
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
     }
 });
-
 
 // Oznacz gotowość skryptu
 console.log('Webhook do powiadomień jest gotowy!');
