@@ -83,7 +83,7 @@ async function sendNotification() {
     console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
 
     // Wysyłanie powiadomienia do webhooka
-    fetch('https://discord.com/api/webhooks/1289269499853406351/M0kHaRGcwcufDc0isuzBl3cMmyOu8RNJfT-B49679xtv0KSxLzAEIKqzEXtQLLw0Suqz', { // Zamień na swój URL webhooka
+    fetch('https://discord.com/api/webhooks/1299764781041062019/AduCrdUGtqYLfrqJiiYqltNW4TcoWqcSwaQ78iX0zU5jfo64qva6KUn2FCiJc8LWpE_E', { // Zamień na swój URL webhooka
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
