@@ -267,7 +267,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
         const notificationDate = new Date(futureDate);
         notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
-        notificationDate.setHours(23, 0, 0, 0); // Ustaw godziny na 22:00
+        notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
 
@@ -429,6 +429,87 @@ cron.schedule('* * * * *', async () => {
         }
     } catch (error) {
         console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
+    }
+});
+
+const sendDutyNotification = async (employee, formattedDate, task) => {
+    if (!isCorrectTime()) {
+        console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
+        return;
+    }
+
+    try {
+        const userId = getUserId(employee); // Uzyskaj ID użytkownika
+
+        // Ustaw datę na dzisiaj o 22:00
+        const notificationDate = new Date();
+        notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
+
+        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
+
+        const message = {
+            content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
+            embeds: [
+                {
+                    title: "Powiadomienie!",
+                    description: `Dzisiaj **(${formattedDate})** masz dyżur!`,
+                    color: 3066993, // Kolor zielony (hex: #2ECC71)
+                    fields: [
+                        {
+                            name: "Czas do końca dyżuru:",
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dzisiaj
+                            inline: true
+                        }
+                    ],
+                    footer: {
+                        text: "Miłego dnia :)"
+                    }
+                }
+            ]
+        };
+
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Pobierz tekst błędu
+            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
+        }
+        console.log('Wiadomość wysłana pomyślnie!');
+    } catch (error) {
+        console.error('Błąd przy wysyłaniu wiadomości:', error);
+    }
+};
+
+// Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
+cron.schedule('* * * * *', async () => {
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' });
+    const [day, month, year] = formattedDate.split('.');
+    const polishDateFormat = `${day}.${month}.${year}`;
+
+    try {
+        // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "dyżur"
+        const workdays = await Workday.find({ date: polishDateFormat, task: 'dyżur' });
+        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "dyżur":`, workdays);
+
+        if (workdays.length > 0) {
+            for (const workday of workdays) {
+                // Wyślij wiadomość pingując pracownika
+                await sendDutyNotification(workday.employee, polishDateFormat, workday.task);
+            }
+        } else {
+            console.log('Brak zadań "dyżur" na dzisiaj.');
+        }
+    } catch (error) {
+        console.error('Błąd podczas pobierania danych z bazy:', error);
     }
 });
 
