@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:56 PM
-    return hours === 1 && minutes === 6 && period === 'PM';
+    return hours === 1 && minutes === 12 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -385,7 +385,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     try {
         const userId = getUserId(employee);
         const reminderDate = new Date();
-        reminderDate.setUTCHours(22, 0, 0, 0); // 22:00 dzisiaj
+        reminderDate.setUTCHours(23, 0, 0, 0); // 22:00 dzisiaj
 
         const timestamp = Math.floor(reminderDate.getTime() / 1000);
         console.log(`Data przypomnienia: ${reminderDate}, Timestamp: ${timestamp}`);
