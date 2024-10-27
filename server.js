@@ -199,7 +199,7 @@ app.delete('/workdays/:id', async (req, res) => {
 });
 
 // URL webhooka
-const webhookUrl = 'https://discord.com/api/webhooks/1289269499853406351/M0kHaRGcwcufDc0isuzBl3cMmyOu8RNJfT-B49679xtv0KSxLzAEIKqzEXtQLLw0Suqz';
+const webhookUrl = 'https://discord.com/api/webhooks/1246571501772341388/B8QWWkLnMZ36OwU7Zch0q96caBWwG23YCvXjmE60JAzQmbDDqcc1nNQjayhTN3EGadHo';
 
 // Mapa użytkowników
 const userMap = {
@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 12 && minutes === 0 && period === 'PM';
+    return hours === 12 && minutes === 40 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -267,7 +267,7 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
         // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
         const notificationDate = new Date(futureDate);
         notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
-        notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
+        notificationDate.setHours(23, 0, 0, 0); // Ustaw godziny na 22:00
 
         const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
 
@@ -317,32 +317,61 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-
-// Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
-cron.schedule('* * * * *', async () => {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('pl-PL', { timeZone: 'Europe/Warsaw' }); // Użyj formatu polskiego z czasem w Warszawie
-    const [day, month, year] = formattedDate.split('.'); // Rozdziel datę na dzień, miesiąc i rok
-    const polishDateFormat = `${day}.${month}.${year}`; // Stwórz format DD.MM.YYYY // Stwórz format YYYY-MM-DD
+const sendDutyNotification = async (employee, formattedDate, task) => {
+    if (!isCorrectTime()) {
+        console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
+        return;
+    }
 
     try {
-        // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
-        const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
+        const userId = getUserId(employee); // Uzyskaj ID użytkownika
 
-        if (workdays.length > 0) {
-            for (const workday of workdays) {
-                // Wyślij wiadomość pingując pracownika
-                await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
-            }
-        } else {
-            console.log('Brak zadań "sprawdzanieRaportów" na dzisiaj.');
+        // Ustaw datę na dzisiaj o 22:00
+        const notificationDate = new Date();
+        notificationDate.setHours(23, 0, 0, 0); // Ustaw godziny na 22:00
+
+        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
+
+        const message = {
+            content: `<@${userId}>`, // Ping użytkownika przez ID
+            embeds: [
+                {
+                    title: "Powiadomienie!",
+                    description: `Dzisiaj **(${formattedDate})** masz dyżur!`,
+                    color: 3066993, // Kolor zielony
+                    fields: [
+                        {
+                            name: "Czas do końca dyżuru:",
+                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dzisiaj
+                            inline: true
+                        }
+                    ],
+                    footer: {
+                        text: "Miłego dnia :)"
+                    }
+                }
+            ]
+        };
+
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Pobierz tekst błędu
+            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
+        console.log('Wiadomość wysłana pomyślnie!');
     } catch (error) {
-        console.error('Błąd podczas pobierania danych z bazy:', error);
+        console.error('Błąd przy wysyłaniu wiadomości:', error);
     }
-});
-
+};
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
@@ -406,88 +435,6 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-// Zaplanuj przypomnienie na 5 dni po dacie zadania, ale wysyłaj tylko o 15:20
-cron.schedule('* * * * *', async () => {
-    const today = new Date();
-    const reminderDate = new Date();
-    reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
-
-    const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL'); // Formatowanie daty przypomnienia
-
-    try {
-        // Znajdź wszystkie wpisy, gdzie task to "sprawdzanieRaportów", a data jest 5 dni wcześniej
-        const workdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, workdays);
-
-        if (workdays.length > 0) {
-            for (const workday of workdays) {
-                // Wyślij przypomnienie pingując pracownika, jeśli jest 15:20
-                await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
-            }
-        } else {
-            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
-        }
-    } catch (error) {
-        console.error('Błąd podczas pobierania danych z bazy dla przypomnienia:', error);
-    }
-});
-
-const sendDutyNotification = async (employee, formattedDate, task) => {
-    if (!isCorrectTime()) {
-        console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
-        return;
-    }
-
-    try {
-        const userId = getUserId(employee); // Uzyskaj ID użytkownika
-
-        // Ustaw datę na dzisiaj o 22:00
-        const notificationDate = new Date();
-        notificationDate.setHours(22, 0, 0, 0); // Ustaw godziny na 22:00
-
-        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
-
-        const message = {
-            content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
-            embeds: [
-                {
-                    title: "Powiadomienie!",
-                    description: `Dzisiaj **(${formattedDate})** masz dyżur!`,
-                    color: 3066993, // Kolor zielony (hex: #2ECC71)
-                    fields: [
-                        {
-                            name: "Czas do końca dyżuru:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dzisiaj
-                            inline: true
-                        }
-                    ],
-                    footer: {
-                        text: "Miłego dnia :)"
-                    }
-                }
-            ]
-        };
-
-        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
-
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(message),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
-            throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
-        }
-        console.log('Wiadomość wysłana pomyślnie!');
-    } catch (error) {
-        console.error('Błąd przy wysyłaniu wiadomości:', error);
-    }
-};
-
 // Zaplanuj zadanie na każdą minutę w godzinach od 00:00 do 01:59 w polskim czasie
 cron.schedule('* * * * *', async () => {
     const today = new Date();
@@ -496,20 +443,52 @@ cron.schedule('* * * * *', async () => {
     const polishDateFormat = `${day}.${month}.${year}`;
 
     try {
-        // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "dyżur"
-        const workdays = await Workday.find({ date: polishDateFormat, task: 'dyżur' });
-        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "dyżur":`, workdays);
+        // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
+        const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
 
+        // Wysyłaj powiadomienia o sprawdzaniu raportów
         if (workdays.length > 0) {
             for (const workday of workdays) {
-                // Wyślij wiadomość pingując pracownika
+                await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
+            }
+        } else {
+            console.log('Brak zadań "sprawdzanieRaportów" na dzisiaj.');
+        }
+
+        // Następnie znajdź wpisy dotyczące dyżurów
+        const dutyWorkdays = await Workday.find({ date: polishDateFormat, task: 'dyżur' });
+        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "dyżur":`, dutyWorkdays);
+
+        // Wysyłaj powiadomienia o dyżurach
+        if (dutyWorkdays.length > 0) {
+            for (const workday of dutyWorkdays) {
                 await sendDutyNotification(workday.employee, polishDateFormat, workday.task);
             }
         } else {
             console.log('Brak zadań "dyżur" na dzisiaj.');
         }
+
+        // Po zakończeniu dyżurów, zaplanuj przypomnienia na 5 dni
+        const reminderDate = new Date();
+        reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
+        const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL'); // Polskie formatowanie dla przypomnienia
+
+        // Sprawdź wpisy sprzed 5 dni
+        const reminderWorkdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
+        console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, reminderWorkdays);
+
+        // Sprawdź, czy jest godzina 15:20
+        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 40) {
+            for (const workday of reminderWorkdays) {
+                // Wysyłanie przypomnienia
+                await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
+            }
+        } else if (reminderWorkdays.length === 0) {
+            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
+        }
     } catch (error) {
-        console.error('Błąd podczas pobierania danych z bazy:', error);
+        console.error('Błąd podczas przetwarzania danych:', error);
     }
 });
 
