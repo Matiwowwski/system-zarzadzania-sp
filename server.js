@@ -374,6 +374,7 @@ const sendDutyNotification = async (employee, formattedDate, task) => {
 };
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
+// Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Przypomnienie nie zostanie wysłane.');
@@ -381,21 +382,19 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
     }
 
     try {
-        const userId = getUserId(employee); // Uzyskaj ID użytkownika
-
-        // Oblicz datę na 22:00 dnia dzisiejszego
+        const userId = getUserId(employee);
         const reminderDate = new Date();
-        reminderDate.setUTCHours(22, 0, 0, 0); // Ustaw godziny na 22:00 UTC
+        reminderDate.setUTCHours(22, 0, 0, 0); // 22:00 dzisiaj
 
-        const timestamp = Math.floor(reminderDate.getTime() / 1000); // Użyj reminderDate do konwersji na sekundy
+        const timestamp = Math.floor(reminderDate.getTime() / 1000);
 
         const message = {
-            content: `<@${userId}>`, // Ping użytkownika przez ID
+            content: `<@${userId}>`,
             embeds: [
                 {
                     title: "Przypomnienie o kończącym się terminie!",
                     description: `Minęło 5 dni od daty **${formattedDate}**, przypominamy o sprawdzeniu raportów!`,
-                    color: 15158332, // Kolor czerwony
+                    color: 15158332,
                     fields: [
                         {
                             name: "Zakres sprawdzania:",
@@ -404,7 +403,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                         },
                         {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia dzisiejszego
+                            value: `<t:${timestamp}:R>`,
                             inline: true
                         }
                     ],
@@ -415,18 +414,16 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
             ]
         };
 
-        console.log('Wysyłam przypomnienie:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+        console.log('Wysyłam przypomnienie:', JSON.stringify(message, null, 2));
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message),
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
+            const errorText = await response.text();
             throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Przypomnienie wysłane pomyślnie!');
@@ -448,12 +445,8 @@ cron.schedule('* * * * *', async () => {
         console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
 
         // Wysyłaj powiadomienia o sprawdzaniu raportów
-        if (workdays.length > 0) {
-            for (const workday of workdays) {
-                await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
-            }
-        } else {
-            console.log('Brak zadań "sprawdzanieRaportów" na dzisiaj.');
+        for (const workday of workdays) {
+            await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
         }
 
         // Następnie znajdź wpisy dotyczące dyżurów
@@ -461,27 +454,21 @@ cron.schedule('* * * * *', async () => {
         console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "dyżur":`, dutyWorkdays);
 
         // Wysyłaj powiadomienia o dyżurach
-        if (dutyWorkdays.length > 0) {
-            for (const workday of dutyWorkdays) {
-                await sendDutyNotification(workday.employee, polishDateFormat, workday.task);
-            }
-        } else {
-            console.log('Brak zadań "dyżur" na dzisiaj.');
+        for (const workday of dutyWorkdays) {
+            await sendDutyNotification(workday.employee, polishDateFormat, workday.task);
         }
 
-        // Po zakończeniu dyżurów, zaplanuj przypomnienia na 5 dni
-        const reminderDate = new Date();
-        reminderDate.setDate(today.getDate() - 5); // Ustaw datę na 5 dni przed dzisiejszą
-        const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL'); // Polskie formatowanie dla przypomnienia
-
         // Sprawdź wpisy sprzed 5 dni
+        const reminderDate = new Date();
+        reminderDate.setDate(today.getDate() - 5);
+        const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL');
+
         const reminderWorkdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
         console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, reminderWorkdays);
 
         // Sprawdź, czy jest godzina 15:20
-        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 45) {
+        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 52) {
             for (const workday of reminderWorkdays) {
-                // Wysyłanie przypomnienia
                 await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
         } else if (reminderWorkdays.length === 0) {
