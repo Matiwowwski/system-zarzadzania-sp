@@ -233,8 +233,8 @@ const isCorrectTime = () => {
 
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
-    // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 12 && minutes === 56 && period === 'PM';
+    // Sprawdzenie, czy jest 12:56 PM
+    return hours === 1 && minutes === 6 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -374,8 +374,9 @@ const sendDutyNotification = async (employee, formattedDate, task) => {
 };
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
-// Funkcja do wysyłania przypomnień o kończącym się terminie
 const sendReminder = async (employee, formattedDate, reportNumber) => {
+    console.log(`Próbuję wysłać przypomnienie dla pracownika: ${employee}, data: ${formattedDate}, numer raportu: ${reportNumber}`);
+
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Przypomnienie nie zostanie wysłane.');
         return;
@@ -387,6 +388,7 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
         reminderDate.setUTCHours(22, 0, 0, 0); // 22:00 dzisiaj
 
         const timestamp = Math.floor(reminderDate.getTime() / 1000);
+        console.log(`Data przypomnienia: ${reminderDate}, Timestamp: ${timestamp}`);
 
         const message = {
             content: `<@${userId}>`,
@@ -467,13 +469,14 @@ cron.schedule('* * * * *', async () => {
         console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, reminderWorkdays);
 
         // Sprawdź, czy jest godzina 15:20
-        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 56) {
-            for (const workday of reminderWorkdays) {
-                await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
-            }
-        } else if (reminderWorkdays.length === 0) {
-            console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
-        }
+if (reminderWorkdays.length > 0 && isCorrectTime()) {
+    console.log('Rozpoczynam wysyłanie przypomnień o raportach sprzed 5 dni.');
+    for (const workday of reminderWorkdays) {
+        await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
+    }
+} else if (reminderWorkdays.length === 0) {
+    console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
+}
     } catch (error) {
         console.error('Błąd podczas przetwarzania danych:', error);
     }
