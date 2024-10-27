@@ -234,7 +234,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:45 AM (co odpowiada 00:45 w formacie 24-godzinnym)
-    return hours === 12 && minutes === 45 && period === 'PM';
+    return hours === 12 && minutes === 56 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -467,7 +467,7 @@ cron.schedule('* * * * *', async () => {
         console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, reminderWorkdays);
 
         // Sprawdź, czy jest godzina 15:20
-        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 52) {
+        if (reminderWorkdays.length > 0 && today.getHours() === 12 && today.getMinutes() === 56) {
             for (const workday of reminderWorkdays) {
                 await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
             }
