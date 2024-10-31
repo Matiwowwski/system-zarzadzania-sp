@@ -236,7 +236,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:56 PM
-    return hours === 11 && minutes === 10 && period === 'PM';
+    return hours === 11 && minutes === 39 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -252,65 +252,55 @@ cron.schedule('* * * * *', async () => {
 // Testowanie funkcji isCorrectTime
 console.log(isCorrectTime());  // Sprawdza, czy funkcja działa poprawnie (wyświetli true tylko o 15:32 w Polsce)
 
-const sendNotification = async (employee, formattedDate, reportNumber) => {
+const sendNotification = async (employees, formattedDate, reportNumbers) => {
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
         return;
     }
 
     try {
-        const userId = getUserId(employee); // Uzyskaj ID użytkownika
-        
-        // Oblicz datę na 22:00 dnia poprzedniego
-        const futureDate = new Date();
-        futureDate.setUTCDate(futureDate.getUTCDate() + 5); // Ustaw datę na 5 dni do przodu
-        futureDate.setHours(0, 0, 0, 0); // Ustaw godziny, minuty, sekundy i milisekundy na 00:00
+        // Oblicz datę powiadomienia na 23:00 dnia poprzedniego
+        const notificationDate = new Date();
+        notificationDate.setDate(notificationDate.getDate() + 4);
+        notificationDate.setHours(23, 0, 0, 0);
 
-        // Oblicz datę powiadomienia na 22:00 dnia poprzedniego
-        const notificationDate = new Date(futureDate);
-        notificationDate.setUTCDate(notificationDate.getUTCDate() - 1); // Ustaw datę na dzień wstecz
-        notificationDate.setHours(23, 0, 0, 0); // Ustaw godziny na 22:00
+        const timestamp = Math.floor(notificationDate.getTime() / 1000);
 
-        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
+        // Pinguj użytkowników wraz z zakresem sprawdzania raportów
+        const userNotifications = employees.map((employee, index) => {
+            const reportNumber = reportNumbers[index];
+            return `<@${getUserId(employee)}> \`${reportNumber}\``;
+        });
 
         const message = {
-            content: `<@${userId}>`, // Ping użytkownika przez ID w formacie <@ID>
+            content: userNotifications.join(', '),
             embeds: [
                 {
                     title: "Powiadomienie!",
-                    description: `Dzisiaj **(${formattedDate})** sprawdzasz/cie raporty!`,
-                    color: 3447003, // Kolor niebieski
+                    description: `Dzisiaj **(${formattedDate})** sprawdzacie raporty!`,
+                    color: 3447003,
                     fields: [
                         {
-                            name: "Zakres sprawdzania:",
-                            value: `${reportNumber}`,
-                            inline: true
-                        },
-                        {
                             name: "Termin mija:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dnia poprzedniego
+                            value: `<t:${timestamp}:R>`,
                             inline: true
                         }
                     ],
-                    footer: {
-                        text: "Miłego dnia :)"
-                    }
+                    footer: { text: "Miłego dnia :)" }
                 }
             ]
         };
 
-        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2));
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message),
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
+            const errorText = await response.text();
             throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
@@ -319,54 +309,48 @@ const sendNotification = async (employee, formattedDate, reportNumber) => {
     }
 };
 
-const sendDutyNotification = async (employee, formattedDate, task) => {
+const sendDutyNotification = async (employees, formattedDate, tasks) => {
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Powiadomienie nie zostanie wysłane.');
         return;
     }
 
     try {
-        const userId = getUserId(employee); // Uzyskaj ID użytkownika
-
-        // Ustaw datę na dzisiaj o 22:00
+        const userIds = employees.map(employee => `<@${getUserId(employee)}>`);
+        
         const notificationDate = new Date();
-        notificationDate.setHours(23, 0, 0, 0); // Ustaw godziny na 22:00
+        notificationDate.setDate(notificationDate.getDate() + 4);
+        notificationDate.setHours(23, 0, 0, 0);
 
-        const timestamp = Math.floor(notificationDate.getTime() / 1000); // Zmień na timestamp powiadomienia
+        const timestamp = Math.floor(notificationDate.getTime() / 1000);
 
         const message = {
-            content: `<@${userId}>`, // Ping użytkownika przez ID
+            content: userIds.join(', '),
             embeds: [
                 {
-                    title: "Powiadomienie!",
+                    title: "Powiadomienie o dyżurze!",
                     description: `Dzisiaj **(${formattedDate})** masz dyżur!`,
-                    color: 3066993, // Kolor zielony
-                    fields: [
-                        {
-                            name: "Czas do końca dyżuru:",
-                            value: `<t:${timestamp}:R>`, // Timestamp na 22:00 dzisiaj
-                            inline: true
-                        }
-                    ],
-                    footer: {
-                        text: "Miłego dnia :)"
-                    }
+                    color: 3066993,
+                    fields: tasks.map(task => ({
+                        name: "Czas do końca dyżuru:",
+                        value: `<t:${timestamp}:R>`,
+                        inline: true
+                    })),
+                    footer: { text: "Miłego dnia :)" }
                 }
             ]
         };
 
-        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2)); // Loguj wiadomość przed wysłaniem
+        console.log('Wysyłam wiadomość:', JSON.stringify(message, null, 2));
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message),
         });
 
         if (!response.ok) {
-            const errorText = await response.text(); // Pobierz tekst błędu
+            const errorText = await response.text();
             throw new Error(`Wystąpił błąd: ${response.statusText} - ${errorText}`);
         }
         console.log('Wiadomość wysłana pomyślnie!');
@@ -376,24 +360,26 @@ const sendDutyNotification = async (employee, formattedDate, task) => {
 };
 
 // Funkcja do wysyłania przypomnień o kończącym się terminie
-const sendReminder = async (employee, formattedDate, reportNumber) => {
-    console.log(`Próbuję wysłać przypomnienie dla pracownika: ${employee}, data: ${formattedDate}, numer raportu: ${reportNumber}`);
-
+const sendReminder = async (employees, formattedDate, reportNumbers) => {
     if (!isCorrectTime()) {
         console.log('Nieprawidłowa godzina. Przypomnienie nie zostanie wysłane.');
         return;
     }
 
     try {
-        const userId = getUserId(employee);
         const reminderDate = new Date();
-        reminderDate.setUTCHours(23, 0, 0, 0); // 22:00 dzisiaj
+        reminderDate.setUTCHours(23, 0, 0, 0);
 
         const timestamp = Math.floor(reminderDate.getTime() / 1000);
-        console.log(`Data przypomnienia: ${reminderDate}, Timestamp: ${timestamp}`);
+
+        // Pinguj użytkowników wraz z zakresem sprawdzania raportów
+        const userReminders = employees.map((employee, index) => {
+            const reportNumber = reportNumbers[index];
+            return `<@${getUserId(employee)}> \`${reportNumber}\``;
+        });
 
         const message = {
-            content: `<@${userId}>`,
+            content: userReminders.join(', '),
             embeds: [
                 {
                     title: "Przypomnienie o kończącym się terminie!",
@@ -401,19 +387,12 @@ const sendReminder = async (employee, formattedDate, reportNumber) => {
                     color: 15158332,
                     fields: [
                         {
-                            name: "Zakres sprawdzania:",
-                            value: `${reportNumber}`,
-                            inline: true
-                        },
-                        {
-                            name: "Termin mija:",
+                            name: "Pozostały czas na sprawdzenie:",
                             value: `<t:${timestamp}:R>`,
                             inline: true
                         }
                     ],
-                    footer: {
-                        text: "Proszę zakończyć sprawdzanie raportów jak najszybciej!"
-                    }
+                    footer: { text: "Proszę zakończyć sprawdzanie raportów jak najszybciej!" }
                 }
             ]
         };
@@ -444,41 +423,65 @@ cron.schedule('* * * * *', async () => {
     const polishDateFormat = `${day}.${month}.${year}`;
 
     try {
-        // Znajdź wszystkie wpisy na dzisiaj, gdzie task to "sprawdzanieRaportów"
         const workdays = await Workday.find({ date: polishDateFormat, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "sprawdzanieRaportów":`, workdays);
-
-        // Wysyłaj powiadomienia o sprawdzaniu raportów
-        for (const workday of workdays) {
-            await sendNotification(workday.employee, polishDateFormat, workday.reportNumber);
-        }
-
-        // Następnie znajdź wpisy dotyczące dyżurów
         const dutyWorkdays = await Workday.find({ date: polishDateFormat, task: 'dyżur' });
-        console.log(`Znaleziono wpisy na dzień ${polishDateFormat} z zadaniem "dyżur":`, dutyWorkdays);
 
-        // Wysyłaj powiadomienia o dyżurach
-        for (const workday of dutyWorkdays) {
-            await sendDutyNotification(workday.employee, polishDateFormat, workday.task);
+        const reportGroups = {};
+        const dutyGroups = {};
+
+        // Grupa powiadomień o raportach
+        workdays.forEach(workday => {
+            if (!reportGroups[workday.date]) {
+                reportGroups[workday.date] = { employees: [], reportNumbers: [] };
+            }
+            reportGroups[workday.date].employees.push(workday.employee);
+            reportGroups[workday.date].reportNumbers.push(workday.reportNumber);
+        });
+
+        // Grupa powiadomień o dyżurach
+        dutyWorkdays.forEach(workday => {
+            if (!dutyGroups[workday.date]) {
+                dutyGroups[workday.date] = { employees: [], tasks: [] };
+            }
+            dutyGroups[workday.date].employees.push(workday.employee);
+            dutyGroups[workday.date].tasks.push(workday.task);
+        });
+
+        // Wysyłanie powiadomień dla grup raportów
+        for (const date in reportGroups) {
+            const { employees, reportNumbers } = reportGroups[date];
+            await sendNotification(employees, polishDateFormat, reportNumbers);
         }
 
-        // Sprawdź wpisy sprzed 5 dni
+        // Wysyłanie powiadomień dla grup dyżurów
+        for (const date in dutyGroups) {
+            const { employees, tasks } = dutyGroups[date];
+            await sendDutyNotification(employees, polishDateFormat, tasks);
+        }
+
         const reminderDate = new Date();
         reminderDate.setDate(today.getDate() - 5);
         const formattedReminderDate = reminderDate.toLocaleDateString('pl-PL');
 
         const reminderWorkdays = await Workday.find({ date: formattedReminderDate, task: 'sprawdzanieRaportów' });
-        console.log(`Znaleziono wpisy na ${formattedReminderDate} z zadaniem "sprawdzanieRaportów":`, reminderWorkdays);
 
-        // Sprawdź, czy jest godzina 15:20
-if (reminderWorkdays.length > 0 && isCorrectTime()) {
-    console.log('Rozpoczynam wysyłanie przypomnień o raportach sprzed 5 dni.');
-    for (const workday of reminderWorkdays) {
-        await sendReminder(workday.employee, formattedReminderDate, workday.reportNumber);
-    }
-} else if (reminderWorkdays.length === 0) {
-    console.log(`Brak zadań "sprawdzanieRaportów" sprzed 5 dni (${formattedReminderDate}).`);
-}
+        const reminderGroups = {};
+
+        // Grupa przypomnień o terminach
+        reminderWorkdays.forEach(workday => {
+            if (!reminderGroups[workday.date]) {
+                reminderGroups[workday.date] = { employees: [], reportNumbers: [] };
+            }
+            reminderGroups[workday.date].employees.push(workday.employee);
+            reminderGroups[workday.date].reportNumbers.push(workday.reportNumber);
+        });
+
+        // Wysyłanie przypomnień dla grup
+        for (const date in reminderGroups) {
+            const { employees, reportNumbers } = reminderGroups[date];
+            await sendReminder(employees, formattedReminderDate, reportNumbers);
+        }
+
     } catch (error) {
         console.error('Błąd podczas przetwarzania danych:', error);
     }
