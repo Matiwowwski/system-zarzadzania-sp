@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Nagłówki dla kategorii
     const categories = ['Godziny pracy', 'Urlop płatny', 'Urlop bezpłatny', 'Pozostałe wydarzenia'];
-    const employees = ["SA-100", "PS-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105"];
+    const employees = ["SA-100", "PS-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105", "SP-106", "SP-107"];
 
     // Funkcja pobierająca dane z endpointu /workdays
     let currentDate = new Date(); // Pobranie aktualnej daty
