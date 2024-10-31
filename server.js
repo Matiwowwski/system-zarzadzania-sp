@@ -199,7 +199,7 @@ app.delete('/workdays/:id', async (req, res) => {
 });
 
 // URL webhooka
-const webhookUrl = 'https://discord.com/api/webhooks/1299764781041062019/AduCrdUGtqYLfrqJiiYqltNW4TcoWqcSwaQ78iX0zU5jfo64qva6KUn2FCiJc8LWpE_E';
+const webhookUrl = 'https://discord.com/api/webhooks/1223000074804789248/HOAzQ0FX6xhNglD_wv4N5JCB86IFqODQ0N5G2Z-4dIW0Bm7Vul8IHi7zQtZE0XpKEhNE';
 
 // Mapa użytkowników
 const userMap = {
@@ -211,6 +211,8 @@ const userMap = {
     'SP-103': '805745794010579015',
     'SP-104': '528618523308720149',
     'SP-105': '811164013026607145',
+    'SP-106': '599682381913260034',
+    'SP-107': '690559064773623818',
 }
 
 // Funkcja do pingowania użytkownika
@@ -234,7 +236,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:56 PM
-    return hours === 12 && minutes === 0 && period === 'PM';
+    return hours === 11 && minutes === 10 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
