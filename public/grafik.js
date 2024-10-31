@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const calendarBody = document.getElementById('calendarBody');
-    const employees = ["SA-100", "PS-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105"];
+    const employees = ["SA-100", "PS-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105", "SP-106", "SP-107"];
     let currentDate = new Date();
     let currentWeekStart = getStartOfWeek(currentDate);
 
