@@ -199,7 +199,7 @@ app.delete('/workdays/:id', async (req, res) => {
 });
 
 // URL webhooka
-const webhookUrl = 'https://discord.com/api/webhooks/1299764781041062019/AduCrdUGtqYLfrqJiiYqltNW4TcoWqcSwaQ78iX0zU5jfo64qva6KUn2FCiJc8LWpE_E';
+const webhookUrl = 'https://discord.com/api/webhooks/1223000074804789248/HOAzQ0FX6xhNglD_wv4N5JCB86IFqODQ0N5G2Z-4dIW0Bm7Vul8IHi7zQtZE0XpKEhNE';
 
 // Mapa użytkowników
 const userMap = {
@@ -236,7 +236,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:56 PM
-    return hours === 12 && minutes === 0 && period === 'PM';
+    return hours === 6 && minutes === 33 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
@@ -384,7 +384,7 @@ const sendReminder = async (employees, formattedDate, reportNumbers) => {
                 {
                     title: "Przypomnienie o kończącym się terminie!",
                     description: `Minęło 5 dni od daty **${formattedDate}**, przypominamy o sprawdzeniu raportów!`,
-                    color: 15158332,
+                    color: 16776960,
                     fields: [
                         {
                             name: "Pozostały czas na sprawdzenie:",
