@@ -173,7 +173,7 @@ async function sendShiftChangeNotification() {
             {
                 title: "Zmiana w grafiku",
                 description: `Zmiana obowiązków z dnia **${formattedScheduleDate}**.\n\n**Zakres sprawdzania raportów:**\n${scope}.`,
-                color: 8421504,
+                color: 16777215,
                 footer: {
                     text: "Proszę o zapoznanie się ze zmianą!"
                 }
