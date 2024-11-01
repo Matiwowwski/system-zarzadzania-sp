@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zarządzanie Powiadomieniami</title>
     <style>
-        body {
+body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1c1c1c, #323232); /* Gradient tła */
+            background: linear-gradient(135deg, #1c1c1c, #323232);
             color: #ffffff;
             margin: 0;
             display: flex;
@@ -19,11 +19,11 @@
         }
 
         .container {
-            background: radial-gradient(circle, #262626, #1c1c1c); /* Efekt radialny */
-            border-radius: 20px; /* Zaokrąglone krawędzie */
+            background: radial-gradient(circle, #262626, #1c1c1c);
+            border-radius: 20px;
             width: 90%;
             max-width: 600px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7); /* Głębszy cień */
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
             padding: 40px;
             text-align: center;
             margin-top: 20px;
@@ -52,13 +52,14 @@
             color: #ffffff;
             margin-bottom: 20px;
             font-size: 1em;
+            box-sizing: border-box; /* Dodane dla pełnej responsywności */
         }
 
         .btn-circle {
             background-color: #4a90e2;
             color: white;
             padding: 15px 25px;
-            border-radius: 50px; /* Zaokrąglony kształt przycisku */
+            border-radius: 50px;
             border: none;
             font-size: 1.2em;
             cursor: pointer;
@@ -79,8 +80,8 @@
             color: #ffffff;
             margin-top: 20px;
             position: relative;
-    bottom: 0;
-    width: 100%;
+            bottom: 0;
+            width: 100%;
         }
 
         .footer p {
@@ -97,10 +98,12 @@
             <select id="template" onchange="toggleFields()">
                 <option value="">-- Wybierz szablon --</option>
                 <option value="raport">Mijający czas na sprawdzenie raportu</option>
+                <option value="zmiana">Zmiana w grafiku</option>
+                <option value="zakonczenie">Zakończenie czasu na sprawdzenie</option>
             </select>
         </div>
-
-        <div id="additional-fields" style="display: none;">
+    
+        <div id="raport-fields" style="display: none;">
             <div class="form-group">
                 <label for="employee">Wybierz pracownika:</label>
                 <select id="employee">
@@ -132,66 +135,129 @@
                 <input type="date" id="report-date" required>
             </div>
         </div>
-
-        <button class="btn-circle" onclick="sendNotification()">Wyślij Powiadomienie</button>
-    </div>
     
+        <div id="zmiana-fields" style="display: none;">
+            <div class="form-group">
+                <label for="replaced-person">Osoba zastępowana:</label>
+                <select id="replaced-person">
+                    <option value="SA-100">SA-100</option>
+                    <option value="PS-100">PS-100</option>
+                    <option value="SP-100">SP-100</option>
+                    <option value="SP-101">SP-101</option>
+                    <option value="SP-102">SP-102</option>
+                    <option value="SP-103">SP-103</option>
+                    <option value="SP-104">SP-104</option>
+                    <option value="SP-105">SP-105</option>
+                    <option value="SP-106">SP-106</option>
+                    <option value="SP-107">SP-107</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="replacing-person">Osoba zastępująca:</label>
+                <select id="replacing-person">
+                    <option value="SA-100">SA-100</option>
+                    <option value="PS-100">PS-100</option>
+                    <option value="SP-100">SP-100</option>
+                    <option value="SP-101">SP-101</option>
+                    <option value="SP-102">SP-102</option>
+                    <option value="SP-103">SP-103</option>
+                    <option value="SP-104">SP-104</option>
+                    <option value="SP-105">SP-105</option>
+                    <option value="SP-106">SP-106</option>
+                    <option value="SP-107">SP-107</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="scope">Zakres sprawdzania:</label>
+                <select id="scope">
+                    <option value="ALL">ALL</option>
+                    <option value="TK/Z">TK/Z</option>
+                    <option value="TE/TT">TE/TT</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="schedule-report-date">Data zdania raportów:</label>
+                <input type="date" id="schedule-report-date" required>
+            </div>
+        </div>
+    
+        <div id="zakonczenie-fields" style="display: none;">
+            <div class="form-group">
+                <label for="ending-employee">Wybierz pracownika:</label>
+                <select id="ending-employee">
+                    <option value="SA-100">SA-100</option>
+                    <option value="PS-100">PS-100</option>
+                    <option value="SP-100">SP-100</option>
+                    <option value="SP-101">SP-101</option>
+                    <option value="SP-102">SP-102</option>
+                    <option value="SP-103">SP-103</option>
+                    <option value="SP-104">SP-104</option>
+                    <option value="SP-105">SP-105</option>
+                    <option value="SP-106">SP-106</option>
+                    <option value="SP-107">SP-107</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ending-scope">Zakres sprawdzania:</label>
+                <select id="ending-scope">
+                    <option value="ALL">ALL</option>
+                    <option value="TK/Z">TK/Z</option>
+                    <option value="TE/TT">TE/TT</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ending-report-date">Data sprawdzenia raportów:</label>
+                <input type="date" id="ending-report-date" required>
+            </div>
+        </div>
+    
+        <button class="btn-circle" onclick="sendTemplateNotification()">Wyślij Powiadomienie</button>
+    </div>
+
     <div class="footer">
         <p>&copy; 2024 VZTM Szczecin</p>
     </div>
+</body>
+<script>
+    function sendTemplateNotification() {
+        const template = document.getElementById('template').value;
 
-    <script>
-        function toggleFields() {
-            const templateSelect = document.getElementById('template');
-            const additionalFields = document.getElementById('additional-fields');
-            if (templateSelect.value === 'raport') {
-                additionalFields.style.display = 'block';
-            } else {
-                additionalFields.style.display = 'none';
+        if (template === 'raport') {
+            sendNotification(); // Wysyła powiadomienie o mijającym czasie na raport
+        } else if (template === 'zmiana') {
+            // Sprawdzenie, czy zastępowana i zastępująca osoba są takie same
+            const replacedPerson = document.getElementById('replaced-person').value;
+            const replacingPerson = document.getElementById('replacing-person').value;
+            if (replacedPerson === replacingPerson) {
+                alert('Osoba nie może zastępować samej siebie!');
+                return;
             }
-        }
+            sendShiftChangeNotification(); // Wysyła powiadomienie o zmianie w grafiku
+        } else if (template === 'zakonczenie') {
+            // Zbieranie danych do powiadomienia o zakończeniu terminu
+            const endingEmployee = document.getElementById('ending-employee').value;
+            const endingScope = document.getElementById('ending-scope').value;
+            const endingReportDate = document.getElementById('ending-report-date').value;
 
-        function sendNotification() {
-            const employee = document.getElementById('employee').value;
-            const durationType = document.getElementById('duration-type').value;
-            const durationAmount = document.getElementById('duration-amount').value;
-            const reportDate = document.getElementById('report-date').value; // Dodano nowe pole
-
-            // Walidacja pól
-            if (!employee || !durationType || !durationAmount || !reportDate) {
-                alert('Wypełnij wszystkie pola!');
+            if (!endingEmployee || !endingScope || !endingReportDate) {
+                alert('Proszę wypełnić wszystkie pola dotyczące zakończenia czasu na sprawdzenie.');
                 return;
             }
 
-            // Zbudowanie danych powiadomienia
-            const notificationData = {
-                employee,
-                durationType,
-                durationAmount,
-                reportDate // Dodano nowe pole
-            };
-
-            // Wysyłanie powiadomienia do webhooka (przykładowy adres)
-            fetch('YOUR_WEBHOOK_URL_HERE', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(notificationData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Powiadomienie zostało wysłane!');
-                } else {
-                    alert('Wystąpił błąd podczas wysyłania powiadomienia.');
-                }
-            })
-            .catch(error => {
-                console.error('Błąd:', error);
-                alert('Wystąpił błąd podczas wysyłania powiadomienia.');
-            });
+            // Uruchomienie funkcji sendEndingNotification
+            sendEndingNotification(endingEmployee, endingScope, endingReportDate); 
+        } else {
+            alert('Proszę wybrać szablon powiadomienia.');
         }
-    </script>
+    }
+
+    function toggleFields() {
+        const template = document.getElementById('template').value;
+        document.getElementById('raport-fields').style.display = template === 'raport' ? 'block' : 'none';
+        document.getElementById('zmiana-fields').style.display = template === 'zmiana' ? 'block' : 'none';
+        document.getElementById('zakonczenie-fields').style.display = template === 'zakonczenie' ? 'block' : 'none';
+    }
+</script>
     <script src="sendNotification.js"></script>
     <script src="checkAuth.js"></script>
 </body>
