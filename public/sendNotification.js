@@ -1,5 +1,5 @@
 // URL webhooka
-const webhookUrl = 'https://discord.com/api/webhooks/1223000074804789248/HOAzQ0FX6xhNglD_wv4N5JCB86IFqODQ0N5G2Z-4dIW0Bm7Vul8IHi7zQtZE0XpKEhNE';
+const webhookUrl = 'https://discord.com/api/webhooks/1299764781041062019/AduCrdUGtqYLfrqJiiYqltNW4TcoWqcSwaQ78iX0zU5jfo64qva6KUn2FCiJc8LWpE_E';
 
 // Mapa użytkowników
 const userMap = {
