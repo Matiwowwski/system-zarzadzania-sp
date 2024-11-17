@@ -417,6 +417,10 @@ button:hover {
 .light-blue {
     background-color: #5bc0de; /* Wyrazisty jasno-niebieski */
 }
+
+.brown {
+    background-color: #964b00;
+}
 .details-textarea {
     width: 100%;
     padding: 10px;

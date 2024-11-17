@@ -84,8 +84,8 @@ const displayWorkdays = async () => {
                     accordionHeader.classList.add('cyan');
                 } else if (workday.task === 'inne czynności służbowe') {
                     accordionHeader.classList.add('light-blue');
-                } else {
-                    accordionHeader.style.backgroundColor = '#ddd'; // Domyślny kolor dla innych zadań
+                } else if (workday.task === 'kontrola działu') {
+                    accordionHeader.classList.add('brown'); // Domyślny kolor dla innych zadań
                 }
 
                 // Dodanie treści zadania w rozwijanej części akordeonu
