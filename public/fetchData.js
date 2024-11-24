@@ -2,112 +2,103 @@ let workdaysData = []; // Zmienna do przechowywania dni pracy
 
 const displayWorkdays = async () => {
     try {
-        // Resetuj workdaysData, aby wymusić ponowne pobranie danych
+        // Resetuj dane dni pracy
         workdaysData = [];
 
         console.log('Rozpoczynam pobieranie dni pracy z serwera...');
-        const response = await fetch('/workdays'); // Endpoint do pobierania danych o dniach pracy
+        const response = await fetch('/workdays'); // Pobranie danych z serwera
 
         if (!response.ok) {
             throw new Error(`Błąd HTTP: ${response.status} - ${response.statusText}`);
         }
 
-        workdaysData = await response.json(); // Zakładam, że dane są zwracane w formacie JSON
+        workdaysData = await response.json();
 
         if (!workdaysData || !Array.isArray(workdaysData) || workdaysData.length === 0) {
             console.warn('Brak danych o dniach pracy lub dane są w złym formacie!');
+            // Usuwamy stare wpisy, jeśli nie ma nowych danych
+            document.querySelectorAll('.day .workday-entry').forEach(entry => entry.remove());
             return;
         }
 
         console.log('Dni pracy pomyślnie pobrane z serwera:', workdaysData);
 
-        // Najpierw wyczyść tylko elementy związane z dniami pracy, a nie całą zawartość komórek
-        document.querySelectorAll('.day .workday-entry').forEach(entry => {
-            entry.remove(); // Usuwamy tylko elementy z klasą "workday-entry", nie modyfikujemy innych elementów
-        });
+        // Usuń wszystkie istniejące elementy związane z dniami pracy
+        document.querySelectorAll('.day .workday-entry').forEach(entry => entry.remove());
 
-        // Iteracja po wszystkich dniach pracy
+        // Iteracja po dniach pracy i dodawanie wpisów
         workdaysData.forEach(workday => {
             if (!workday.cellId || !workday.employee || !workday.date || !workday.task) {
                 console.error(`Niekompletne dane dla wpisu pracy: ${JSON.stringify(workday)}`);
-                return; // Pomijamy wpis, jeśli brakuje jakiejś kluczowej informacji
+                return;
             }
 
-            console.log(`Próbuję znaleźć komórkę dla cellId: ${workday.cellId}`);
-
-            // Znalezienie odpowiedniej komórki w kalendarzu na podstawie ID komórki (cellId)
             const cell = document.querySelector(`.day[data-cellid="${workday.cellId}"]`);
 
-            if (cell) {
-                console.log(`Znaleziono komórkę dla cellId: ${workday.cellId}. Tworzę akordeon dla ${workday.employee}`);
-
-                // Tworzenie elementu akordeonu
-                const entry = document.createElement('div');
-                entry.className = 'workday-entry'; // Klasa CSS dla stylizacji
-                entry.setAttribute('data-cellid', workday.cellId); // Dodaj atrybut data-cellid
-                entry.setAttribute('data-id', workday._id); // Dodaj atrybut data-id dla _id
-
-                // Dodanie nagłówka z informacjami o pracowniku i dacie
-                const accordionHeader = document.createElement('div');
-                accordionHeader.className = 'accordion-header';
-                let headerContent = `<span>${workday.employee}</span>`; // Zawsze wyświetlamy imię pracownika
-
-                // Sprawdzamy typ zadania i dodajemy odpowiednią informację
-                if (workday.task === 'urlop') {
-                    headerContent += `<span>${workday.leaveType || 'Brak typu urlopu'}</span>`; // Jeśli zadanie to urlop, wyświetlamy leaveType
-                } else if (workday.task === 'sprawdzanieRaportów') {
-                    headerContent += `<span>Raporty: ${workday.reportNumber || 'Brak numeru raportu'}</span>`; // Jeśli zadanie to sprawdzanie raportów, wyświetlamy reportNumber
-                } else {
-                    headerContent += `<span> ${workday.task}</span>`; // Obsługa innych zadań
-                }
-
-                accordionHeader.innerHTML = headerContent; // Ustawiamy zawartość nagłówka
-
-                // Zastosowanie klas kolorów w zależności od typu zadania
-                if (workday.task === 'sprawdzanieRaportów') {
-                    accordionHeader.classList.add('red');
-                } else if (workday.task === 'urlop') {
-                    accordionHeader.classList.add('blue');
-                } else if (workday.task === 'dyżur') {
-                    accordionHeader.classList.add('yellow');
-                } else if (workday.task === 'dzień wolny nienaruszalny') {
-                    accordionHeader.classList.add('green');
-                } else if (workday.task === 'nieobecność nieusprawiedliwiona') {
-                    accordionHeader.classList.add('orange');
-                } else if (workday.task === 'szkolenie') {
-                    accordionHeader.classList.add('purple');
-                } else if (workday.task === 'zastępstwo') {
-                    accordionHeader.classList.add('pink');
-                } else if (workday.task === 'zawieszenie') {
-                    accordionHeader.classList.add('gray');
-                } else if (workday.task === 'oddelegowanie') {
-                    accordionHeader.classList.add('cyan');
-                } else if (workday.task === 'inne czynności służbowe') {
-                    accordionHeader.classList.add('light-blue');
-                } else if (workday.task === 'kontrola działu') {
-                    accordionHeader.classList.add('brown'); // Domyślny kolor dla innych zadań
-                }
-
-                // Dodanie treści zadania w rozwijanej części akordeonu
-                const accordionContent = document.createElement('div');
-                accordionContent.className = 'accordion-content';
-                accordionContent.innerText = `${workday.task}: ${workday.details || 'Brak dodatkowych informacji'}`;
-
-                // Dodanie elementów do komórki
-                entry.appendChild(accordionHeader);
-                entry.appendChild(accordionContent);
-                cell.appendChild(entry); // Upewnij się, że entry jest dodawane do komórki
-
-                console.log(`Akordeon dla cellId: ${workday.cellId} został dodany poprawnie.`);
-            } else {
-                console.error(`Nie znaleziono komórki w kalendarzu dla cellId: ${workday.cellId}`);
+            if (!cell) {
+                console.error(`Nie znaleziono komórki dla cellId: ${workday.cellId}`);
+                return;
             }
+
+            // Tworzenie elementu dla wpisu w akordeonie
+            const entry = document.createElement('div');
+            entry.className = 'workday-entry';
+            entry.setAttribute('data-cellid', workday.cellId);
+            entry.setAttribute('data-id', workday._id);
+
+            // Tworzenie nagłówka akordeonu
+            const header = document.createElement('div');
+            header.className = 'accordion-header';
+
+            // Generowanie zawartości nagłówka w zależności od typu zadania
+            let headerContent = `<span>${workday.employee}</span>`;
+
+            if (workday.task === 'urlop') {
+                headerContent += `<span>${workday.leaveType || 'Brak typu urlopu'}</span>`;
+            } else if (workday.task === 'sprawdzanieRaportów') {
+                headerContent += `<span>Raporty: ${workday.reportNumber || 'Brak numeru raportu'}</span>`;
+            } else {
+                headerContent += `<span>${workday.task}</span>`;
+            }
+
+            header.innerHTML = headerContent;
+            header.classList.add(getTaskColorClass(workday.task)); // Użycie funkcji pomocniczej
+
+            // Tworzenie zawartości akordeonu
+            const content = document.createElement('div');
+            content.className = 'accordion-content';
+            content.innerText = `${workday.task}: ${workday.details || 'Brak dodatkowych informacji'}`;
+
+            // Dodanie elementów do wpisu i komórki
+            entry.appendChild(header);
+            entry.appendChild(content);
+            cell.appendChild(entry);
         });
+
     } catch (error) {
         console.error('Błąd podczas pobierania lub przetwarzania dni pracy:', error);
         alert(`Wystąpił błąd: ${error.message}. Sprawdź konsolę, aby uzyskać więcej informacji.`);
     }
 };
+
+// Funkcja pomocnicza do przypisywania klasy koloru w zależności od zadania
+const getTaskColorClass = (task) => {
+    switch (task) {
+        case 'sprawdzanieRaportów': return 'red';
+        case 'urlop': return 'blue';
+        case 'dyżur': return 'yellow';
+        case 'dzień wolny nienaruszalny': return 'green';
+        case 'nieobecność nieusprawiedliwiona': return 'orange';
+        case 'szkolenie': return 'purple';
+        case 'zastępstwo': return 'pink';
+        case 'zawieszenie': return 'gray';
+        case 'oddelegowanie': return 'cyan';
+        case 'inne czynności służbowe': return 'light-blue';
+        case 'kontrola działu': return 'brown';
+        default: return ''; // Domyślny brak klasy
+    }
+};
+
 
 // Funkcja do otwierania modalu
 const openModal = (date, employee, cellId) => {

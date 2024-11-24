@@ -43,3 +43,9 @@ document.getElementById('eventForm').addEventListener('submit', function (event)
 
     sendFormData(formData);
 });
+
+const refreshWorkSummaryTable = async () => {
+    // Odświeżenie tabeli po wysłaniu danych
+    await displayWorkdays();  // Pobranie nowych danych do tabeli
+    initWorkSummaryTable();   // Inicjalizacja i wyświetlenie tabeli
+};

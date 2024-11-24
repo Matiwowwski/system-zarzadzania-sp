@@ -1,12 +1,16 @@
-// Tabela podsumowania godzin pracy
-document.addEventListener('DOMContentLoaded', async function () {
+export const initWorkSummaryTable = async () => {
     const summaryContainer = document.createElement('div');
     summaryContainer.classList.add('summary-container');
     const accordionContainer = document.getElementById('accordionContainer');
 
+    if (!accordionContainer) {
+        console.error('Brak elementu z id "accordionContainer" w DOM.');
+        return; // Zakończ funkcję, jeśli kontener nie istnieje
+    }
+
     // Nagłówki dla kategorii
     const categories = ['Godziny pracy', 'Urlop płatny', 'Urlop bezpłatny', 'Pozostałe wydarzenia'];
-    const employees = ["SA-100", "PS-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105", "SP-106", "SP-107"];
+    const employees = ["SA-100", "PS-100", "KZ-100", "SP-100", "SP-101", "SP-102", "SP-103", "SP-104", "SP-105", "SP-106", "SP-107"];
 
     // Funkcja pobierająca dane z endpointu /workdays
     let currentDate = new Date(); // Pobranie aktualnej daty
@@ -29,10 +33,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const entryMonth = parseInt(month, 10) - 1; // Miesiące zaczynają się od 0
                 const entryYear = parseInt(year, 10);   // Rok jako liczba
     
-                console.log('Sprawdzanie daty wpisu:', entry.date);
-                console.log('Miesiąc wpisu:', entryMonth, 'Rok wpisu:', entryYear);
-    
-                // Upewnij się, że porównujesz miesiące (entryMonth jest liczony od 0)
                 return (entryMonth === currentMonth) && (entryYear === currentYear);
             });
         } catch (error) {
@@ -66,7 +66,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     
         // Pobierz dane z endpointu i filtruj je według wybranego miesiąca
         const workdays = await fetchData();
-    
+        if (workdays.length === 0) {
+            console.warn('Brak danych do wyświetlenia dla tego miesiąca.');
+        }
+
         // Tworzenie obiektu do przechowywania sum godzin
         const hoursSummary = {};
         employees.forEach(employee => {
@@ -78,49 +81,54 @@ document.addEventListener('DOMContentLoaded', async function () {
             };
         });
 
- // Obliczanie godzin na podstawie danych
- workdays.forEach(entry => {
-    const { employee, task, leaveType } = entry;
+        // Obliczanie godzin na podstawie danych
+        workdays.forEach(entry => {
+            const { employee, task, leaveType } = entry;
 
-    if (!employee || !task) {
-        console.error(`Brak danych dla wpisu: ${JSON.stringify(entry)}`);
-        return; // Pomijamy niekompletne wpisy
-    }
+            if (!employee || !task) {
+                console.error(`Brak danych dla wpisu: ${JSON.stringify(entry)}`);
+                return; // Pomijamy niekompletne wpisy
+            }
 
-    if (task === 'sprawdzanieRaportów') {
-        hoursSummary[employee]['Godziny pracy'] += 8; // Dodaj 8 godzin do "Godziny pracy"
-    } else if (leaveType === 'płatny') {
-        hoursSummary[employee]['Urlop płatny'] += 8; // Dodaj 8 godzin do "Urlop płatny"
-    } else if (leaveType === 'bezpłatny') {
-        hoursSummary[employee]['Urlop bezpłatny'] += 8; // Dodaj 8 godzin do "Urlop bezpłatny"
-    } else {
-        hoursSummary[employee]['Pozostałe wydarzenia'] += 8; // Dodaj 8 godzin do "Pozostałe wydarzenia"
-    }
-});
+            if (task === 'sprawdzanieRaportów') {
+                hoursSummary[employee]['Godziny pracy'] += 8;
+            } else if (leaveType === 'płatny') {
+                hoursSummary[employee]['Urlop płatny'] += 8;
+            } else if (leaveType === 'bezpłatny') {
+                hoursSummary[employee]['Urlop bezpłatny'] += 8;
+            } else if (leaveType === 'na żądanie') {
+                hoursSummary[employee]['Urlop płatny'] += 8;
+            } else if (leaveType === 'Zwolnienie lekarskie') {
+                hoursSummary[employee]['Urlop płatny'] += 8;
+            } else {
+                hoursSummary[employee]['Pozostałe wydarzenia'] += 8;
+            }
+        });
 
-// Tworzenie wierszy dla każdej kategorii
-const tbody = document.createElement('tbody');
-categories.forEach(category => {
-    const row = document.createElement('tr');
+        // Tworzenie wierszy dla każdej kategorii
+        const tbody = document.createElement('tbody');
+        categories.forEach(category => {
+            const row = document.createElement('tr');
 
-    const categoryCell = document.createElement('td');
-    categoryCell.textContent = category;
-    row.appendChild(categoryCell);
+            const categoryCell = document.createElement('td');
+            categoryCell.textContent = category;
+            row.appendChild(categoryCell);
 
-    employees.forEach(employee => {
-        const dataCell = document.createElement('td');
-        const hours = hoursSummary[employee][category] || 0;
-        dataCell.textContent = `${hours} godzin`; // Formatowanie liczby godzin jako "X godzin"
-        row.appendChild(dataCell);
-    });
+            employees.forEach(employee => {
+                const dataCell = document.createElement('td');
+                const hours = hoursSummary[employee][category] || 0;
+                dataCell.textContent = `${hours} godzin`;
+                row.appendChild(dataCell);
+            });
 
-    tbody.appendChild(row);
-});
+            tbody.appendChild(row);
+        });
 
-table.appendChild(tbody);
-summaryContainer.appendChild(table);
-accordionContainer.appendChild(summaryContainer);
-};
+        table.appendChild(tbody);
+        summaryContainer.appendChild(table);
+        accordionContainer.appendChild(summaryContainer);
+    };
+
     // Funkcje do obsługi przycisków nawigacji między miesiącami
     const handlePreviousMonth = () => {
         if (currentMonth === 0) {
@@ -174,4 +182,7 @@ accordionContainer.appendChild(summaryContainer);
     // Wywołanie funkcji do renderowania tabeli po załadowaniu strony
     updateMonthDisplay();
     renderWorkSummaryTable();
-});
+};
+
+// Uruchomienie funkcji po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', initWorkSummaryTable);
