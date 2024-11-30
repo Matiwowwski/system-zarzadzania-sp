@@ -203,17 +203,16 @@ const webhookUrl = 'https://discord.com/api/webhooks/1299764781041062019/AduCrdU
 
 // Mapa użytkowników
 const userMap = {
-    'SA-100': '528230911507038208', 
+    'SA-100': '528230911507038208',
     'PS-100': '637389583562309636',
     'KZ-100': '509475271871561734',
-    'SP-100': '665270450091458601', 
-    'SP-101': '775738195241205770',
-    'SP-102': '509475271871561734',
-    'SP-103': '805745794010579015',
-    'SP-104': '528618523308720149',
-    'SP-105': '811164013026607145',
-    'SP-106': '599682381913260034',
-    'SP-107': '690559064773623818',
+    'SP-100': '665270450091458601',
+    'SP-101': '805745794010579015',
+    'SP-102': '528618523308720149',
+    'SP-103': '811164013026607145',
+    'SP-104': '599682381913260034',
+    'SP-105': '690559064773623818',
+    'SP-106': '',
 }
 
 // Funkcja do pingowania użytkownika
@@ -237,7 +236,7 @@ const isCorrectTime = () => {
     console.log(`Aktualny czas w Warszawie: ${hours}:${minutes} ${period}`);
 
     // Sprawdzenie, czy jest 12:56 PM
-    return hours === 12 && minutes === 00 && period === 'PM';
+    return hours === 12 && minutes === 0 && period === 'PM';
 };
 
 // Zaplanuj zadanie na każdą minutę od północy do 1 w nocy
